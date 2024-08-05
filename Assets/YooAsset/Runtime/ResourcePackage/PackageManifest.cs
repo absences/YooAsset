@@ -88,10 +88,10 @@ namespace YooAsset
         public Dictionary<string, PackageAsset> AssetDic;
 
         /// <summary>
-        /// 资源路径映射集合（提供Location获取AssetPath）
+        /// 资源路径集合（AssetPath）
         /// </summary>
         [NonSerialized]
-        public Dictionary<string, string> AssetPathMapping1;
+        public List<string> AssetPathMapping1;
 
         /// <summary>
         /// 资源路径映射集合（提供AssetGUID获取AssetPath）
@@ -103,18 +103,12 @@ namespace YooAsset
         /// <summary>
         /// 尝试映射为资源路径
         /// </summary>
-        public string TryMappingToAssetPath(string location)
+        public bool TryMappingToAssetPath(string location)
         {
             if (string.IsNullOrEmpty(location))
-                return string.Empty;
+                return false;
 
-            if (LocationToLower)
-                location = location.ToLower();
-
-            if (AssetPathMapping1.TryGetValue(location, out string assetPath))
-                return assetPath;
-            else
-                return string.Empty;
+            return AssetPathMapping1.Contains(location);
         }
 
         /// <summary>
@@ -146,9 +140,10 @@ namespace YooAsset
         /// 获取资源依赖列表
         /// 注意：传入的资源路径一定合法有效！
         /// </summary>
-        public PackageBundle[] GetAllDependencies(string assetPath)
+        public PackageBundle[] GetAllDependencies(AssetInfo info)
         {
-            var packageBundle = GetMainPackageBundle(assetPath);
+            var packageBundle = info.PackageBundle ?? GetMainPackageBundle(info.AssetPath);
+
             List<PackageBundle> result = new List<PackageBundle>(packageBundle.DependIDs.Length);
             foreach (var dependID in packageBundle.DependIDs)
             {
@@ -159,7 +154,7 @@ namespace YooAsset
                 }
                 else
                 {
-                    throw new Exception($"Invalid bundle id : {dependID} Asset path : {assetPath}");
+                    throw new Exception($"Invalid bundle id : {dependID} Asset path : {info.AssetPath}");
                 }
             }
             return result.ToArray();
@@ -255,12 +250,9 @@ namespace YooAsset
                 return string.Empty;
             }
 
-            if (LocationToLower)
-                location = location.ToLower();
-
-            if (AssetPathMapping1.TryGetValue(location, out string assetPath))
+            if (AssetPathMapping1.Contains(location))
             {
-                return assetPath;
+                return location;
             }
             else
             {

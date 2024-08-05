@@ -1,42 +1,32 @@
-#if UNITY_2019_4_OR_NEWER
-using System;
-using System.IO;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
 using UnityEditor.UIElements;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace YooAsset.Editor
 {
-    internal abstract class BuildPipelineViewerBase
+    public abstract class BuildPipelineViewerBase
     {
         private const int StyleWidth = 400;
-
-        protected readonly string PackageName;
-        protected readonly BuildTarget BuildTarget;
         protected readonly EBuildPipeline BuildPipeline;
         protected TemplateContainer Root;
-
         private TextField _buildOutputField;
+        private TextField _clientOutputField;
         private TextField _buildVersionField;
-        private PopupField<Enum> _buildModeField;
+        private EnumField _targetField;
+        protected BuildTarget BuildTarget;
+        protected PopupField<Enum> _buildModeField;
         private PopupField<Type> _encryptionField;
-        private EnumField _compressionField;
-        private EnumField _outputNameStyleField;
-        private EnumField _copyBuildinFileOptionField;
-        private TextField _copyBuildinFileTagsField;
 
-        public BuildPipelineViewerBase(string packageName, EBuildPipeline buildPipeline, BuildTarget buildTarget, VisualElement parent)
+        public BuildPipelineViewerBase(EBuildPipeline buildPipeline, VisualElement parent)
         {
-            PackageName = packageName;
-            BuildTarget = buildTarget;
             BuildPipeline = buildPipeline;
-
             CreateView(parent);
-            RefreshView();
         }
+        protected Toggle cleanMaterial, buildDebug, moveToClientPC;
+
         private void CreateView(VisualElement parent)
         {
             // 加载布局文件
@@ -48,33 +38,66 @@ namespace YooAsset.Editor
             Root.style.flexGrow = 1f;
             parent.Add(Root);
 
+
             // 输出目录
             string defaultOutputRoot = AssetBundleBuilderHelper.GetDefaultBuildOutputRoot();
             _buildOutputField = Root.Q<TextField>("BuildOutput");
             _buildOutputField.SetValueWithoutNotify(defaultOutputRoot);
             _buildOutputField.SetEnabled(false);
 
+            // client目录
+            string clientOutputRoot = AssetBundleBuilderHelper.GetClientBuildOutputRoot();
+            _clientOutputField = Root.Q<TextField>("ClientOutput");
+            _clientOutputField.SetValueWithoutNotify(clientOutputRoot);
+            _clientOutputField.SetEnabled(false);
+
             // 构建版本
             _buildVersionField = Root.Q<TextField>("BuildVersion");
             _buildVersionField.style.width = StyleWidth;
-            _buildVersionField.SetValueWithoutNotify(GetDefaultPackageVersion());
+            _buildVersionField.SetValueWithoutNotify(AssetBundleBuilderSetting.GetPackageVersion(""));
+            _buildVersionField.RegisterValueChangedCallback(evt => {
 
+                AssetBundleBuilderSetting.SetPackageGetPackageVersion("", _buildVersionField.value);
+            });
             // 构建模式
             {
                 var buildModeContainer = Root.Q("BuildModeContainer");
-                var buildMode = AssetBundleBuilderSetting.GetPackageBuildMode(PackageName, BuildPipeline);
+                var buildMode = AssetBundleBuilderSetting.GetPackageBuildMode(BuildPipeline);
                 var buildModeList = GetSupportBuildModes();
+                if (!buildModeList.Contains(buildMode))
+                {
+                    buildMode = (EBuildMode)buildModeList[0];
+                }
                 int defaultIndex = buildModeList.FindIndex(x => x.Equals(buildMode));
-                if (defaultIndex < 0)
-                    defaultIndex = (int)(EBuildMode)buildModeList[0];
+
                 _buildModeField = new PopupField<Enum>(buildModeList, defaultIndex);
                 _buildModeField.label = "Build Mode";
                 _buildModeField.style.width = StyleWidth;
+
+                var filed = new Label(":");
+                filed.style.width = 200;
+                filed.style.height = 24;
+                filed.style.unityTextAlign = TextAnchor.MiddleLeft;
+                void SetText()
+                {
+                    if ((EBuildMode)_buildModeField.value == EBuildMode.ForceRebuild)
+                    {
+                        filed.text = "强制重建模式,清理旧文件";
+                    }
+                    else
+                    {
+                        filed.text = "增量构建模式";
+                    }
+                }
+
                 _buildModeField.RegisterValueChangedCallback(evt =>
                 {
-                    AssetBundleBuilderSetting.SetPackageBuildMode(PackageName, BuildPipeline, (EBuildMode)_buildModeField.value);
+                    AssetBundleBuilderSetting.SetPackageBuildMode(BuildPipeline, (EBuildMode)_buildModeField.value);
+                    SetText();
                 });
+                SetText();
                 buildModeContainer.Add(_buildModeField);
+                buildModeContainer.Add(filed);
             }
 
             // 加密方法
@@ -83,18 +106,35 @@ namespace YooAsset.Editor
                 var encryptionClassTypes = EditorTools.GetAssignableTypes(typeof(IEncryptionServices));
                 if (encryptionClassTypes.Count > 0)
                 {
-                    var encyptionClassName = AssetBundleBuilderSetting.GetPackageEncyptionClassName(PackageName, BuildPipeline);
+                    var encyptionClassName = AssetBundleBuilderSetting.GetPackageEncyptionClassName(BuildPipeline);
+
                     int defaultIndex = encryptionClassTypes.FindIndex(x => x.FullName.Equals(encyptionClassName));
                     if (defaultIndex < 0)
                         defaultIndex = 0;
                     _encryptionField = new PopupField<Type>(encryptionClassTypes, defaultIndex);
                     _encryptionField.label = "Encryption";
                     _encryptionField.style.width = StyleWidth;
+
+                    var filed = new Label();
+                    filed.style.width = 200;
+                    filed.style.height = 24;
+                    filed.style.unityTextAlign = TextAnchor.MiddleLeft;
+                    void SetText()
+                    {
+                        if (_encryptionField.value == typeof(FileOffsetEncryption))
+                            filed.text = "偏移加密";
+                        else
+                            filed.text = "无加密";
+                    }
+
                     _encryptionField.RegisterValueChangedCallback(evt =>
                     {
-                        AssetBundleBuilderSetting.SetPackageEncyptionClassName(PackageName, BuildPipeline, _encryptionField.value.FullName);
+                        SetText();
+                        AssetBundleBuilderSetting.SetPackageEncyptionClassName(BuildPipeline, _encryptionField.value.FullName);
                     });
+                    SetText();
                     encryptionContainer.Add(_encryptionField);
+                    encryptionContainer.Add(filed);
                 }
                 else
                 {
@@ -105,62 +145,52 @@ namespace YooAsset.Editor
                 }
             }
 
-            // 压缩方式选项
-            var compressOption = AssetBundleBuilderSetting.GetPackageCompressOption(PackageName, BuildPipeline);
-            _compressionField = Root.Q<EnumField>("Compression");
-            _compressionField.Init(compressOption);
-            _compressionField.SetValueWithoutNotify(compressOption);
-            _compressionField.style.width = StyleWidth;
-            _compressionField.RegisterValueChangedCallback(evt =>
+            void setToggle(ref Toggle toggleRef, string serializeName)
             {
-                AssetBundleBuilderSetting.SetPackageCompressOption(PackageName, BuildPipeline, (ECompressOption)_compressionField.value);
-            });
+                toggleRef = Root.Q<Toggle>(serializeName);
 
-            // 输出文件名称样式
-            var fileNameStyle = AssetBundleBuilderSetting.GetPackageFileNameStyle(PackageName, BuildPipeline);
-            _outputNameStyleField = Root.Q<EnumField>("FileNameStyle");
-            _outputNameStyleField.Init(fileNameStyle);
-            _outputNameStyleField.SetValueWithoutNotify(fileNameStyle);
-            _outputNameStyleField.style.width = StyleWidth;
-            _outputNameStyleField.RegisterValueChangedCallback(evt =>
-            {
-                AssetBundleBuilderSetting.SetPackageFileNameStyle(PackageName, BuildPipeline, (EFileNameStyle)_outputNameStyleField.value);
-            });
+                toggleRef.value = AssetBundleBuilderSetting.GetPackageVal(serializeName);
 
-            // 首包文件拷贝选项
-            var buildinFileCopyOption = AssetBundleBuilderSetting.GetPackageBuildinFileCopyOption(PackageName, BuildPipeline);
-            _copyBuildinFileOptionField = Root.Q<EnumField>("CopyBuildinFileOption");
-            _copyBuildinFileOptionField.Init(buildinFileCopyOption);
-            _copyBuildinFileOptionField.SetValueWithoutNotify(buildinFileCopyOption);
-            _copyBuildinFileOptionField.style.width = StyleWidth;
-            _copyBuildinFileOptionField.RegisterValueChangedCallback(evt =>
-            {
-                AssetBundleBuilderSetting.SetPackageBuildinFileCopyOption(PackageName, BuildPipeline, (EBuildinFileCopyOption)_copyBuildinFileOptionField.value);
-                RefreshView();
-            });
+                toggleRef.RegisterValueChangedCallback(val =>
+                {
+                    AssetBundleBuilderSetting.SetPackageVal(serializeName, val.newValue);
+                });
+            }
+            setToggle(ref cleanMaterial, "cleanMaterial");
+            setToggle(ref buildDebug, "containDebugFolder");
+            //setToggle(ref moveToClientPC, "moveToClientPC");
 
-            // 首包文件拷贝参数
-            var buildinFileCopyParams = AssetBundleBuilderSetting.GetPackageBuildinFileCopyParams(PackageName, BuildPipeline);
-            _copyBuildinFileTagsField = Root.Q<TextField>("CopyBuildinFileParam");
-            _copyBuildinFileTagsField.SetValueWithoutNotify(buildinFileCopyParams);
-            _copyBuildinFileTagsField.RegisterValueChangedCallback(evt =>
+            _targetField = Root.Q<EnumField>("BuildTarget");
+
+            BuildTarget = EditorUserBuildSettings.activeBuildTarget;
+
+            _targetField.Init(BuildTarget);//初始化Enum
+            _targetField.value = BuildTarget;
+            _targetField.RegisterValueChangedCallback(val =>
             {
-                AssetBundleBuilderSetting.SetPackageBuildinFileCopyParams(PackageName, BuildPipeline, _copyBuildinFileTagsField.value);
+                BuildTarget = (BuildTarget)val.newValue;
+                RefreshWindow();
             });
 
             // 构建按钮
-            var buildButton = Root.Q<Button>("Build");
+            var buildButton = Root.Q<Button>("BuildAssets");
+            buildButton.text = "Build Assets";
             buildButton.clicked += BuildButton_clicked;
+
+            RefreshWindow();
         }
-        private void RefreshView()
+        private void RefreshWindow()
         {
-            var buildinFileCopyOption = AssetBundleBuilderSetting.GetPackageBuildinFileCopyOption(PackageName, BuildPipeline);
-            bool tagsFiledVisible = buildinFileCopyOption == EBuildinFileCopyOption.ClearAndCopyByTags || buildinFileCopyOption == EBuildinFileCopyOption.OnlyCopyByTags;
-            _copyBuildinFileTagsField.visible = tagsFiledVisible;
+            if (BuildTarget != BuildTarget.Android && BuildTarget != BuildTarget.iOS && BuildTarget != BuildTarget.StandaloneWindows64)
+            {
+                BuildTarget = EditorUserBuildSettings.activeBuildTarget;
+            }
+
+            _targetField.value = BuildTarget;
         }
         private void BuildButton_clicked()
         {
-            var buildMode = AssetBundleBuilderSetting.GetPackageBuildMode(PackageName, BuildPipeline);
+            var buildMode = _buildModeField.value;
             if (EditorUtility.DisplayDialog("提示", $"通过构建模式【{buildMode}】来构建！", "Yes", "No"))
             {
                 EditorTools.ClearUnityConsole();
@@ -171,6 +201,7 @@ namespace YooAsset.Editor
                 Debug.LogWarning("[Build] 打包已经取消");
             }
         }
+
 
         /// <summary>
         /// 执行构建任务
@@ -183,19 +214,11 @@ namespace YooAsset.Editor
         protected abstract List<Enum> GetSupportBuildModes();
 
         /// <summary>
-        /// 获取构建版本
-        /// </summary>
-        protected string GetPackageVersion()
-        {
-            return _buildVersionField.value;
-        }
-
-        /// <summary>
         /// 创建加密类实例
         /// </summary>
         protected IEncryptionServices CreateEncryptionInstance()
         {
-            var encyptionClassName = AssetBundleBuilderSetting.GetPackageEncyptionClassName(PackageName, BuildPipeline);
+            var encyptionClassName = AssetBundleBuilderSetting.GetPackageEncyptionClassName(BuildPipeline);
             var encryptionClassTypes = EditorTools.GetAssignableTypes(typeof(IEncryptionServices));
             var classType = encryptionClassTypes.Find(x => x.FullName.Equals(encyptionClassName));
             if (classType != null)
@@ -203,12 +226,5 @@ namespace YooAsset.Editor
             else
                 return null;
         }
-
-        private string GetDefaultPackageVersion()
-        {
-            int totalMinutes = DateTime.Now.Hour * 60 + DateTime.Now.Minute;
-            return DateTime.Now.ToString("yyyy-MM-dd") + "-" + totalMinutes;
-        }
     }
 }
-#endif

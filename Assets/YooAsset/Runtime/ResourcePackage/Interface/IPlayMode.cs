@@ -40,7 +40,7 @@ namespace YooAsset
 
         // 下载相关
         ResourceDownloaderOperation CreateResourceDownloaderByAll(int downloadingMaxNumber, int failedTryAgain, int timeout);
-        ResourceDownloaderOperation CreateResourceDownloaderByTags(string[] tags, int downloadingMaxNumber, int failedTryAgain, int timeout);
+        ResourceDownloaderOperation CreateResourceDownloaderByTags(string[] tags, bool includeTags, int downloadingMaxNumber, int failedTryAgain, int timeout);
         ResourceDownloaderOperation CreateResourceDownloaderByPaths(AssetInfo[] assetInfos, int downloadingMaxNumber, int failedTryAgain, int timeout);
 
         // 解压相关

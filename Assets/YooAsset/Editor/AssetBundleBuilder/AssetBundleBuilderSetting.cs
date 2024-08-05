@@ -17,77 +17,52 @@ namespace YooAsset.Editor
             string key = $"{Application.productName}_{packageName}_{nameof(EBuildPipeline)}";
             EditorPrefs.SetInt(key, (int)buildPipeline);
         }
-
-        // EBuildMode
-        public static EBuildMode GetPackageBuildMode(string packageName, EBuildPipeline buildPipeline)
+        //BuildVersion
+        public static string GetPackageVersion(string packageName)
         {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_{nameof(EBuildMode)}";
+            string key = $"{Application.productName}_{packageName}_BuildVersion";
+            return EditorPrefs.GetString(key, "2024");
+        }
+        public static void SetPackageGetPackageVersion(string packageName, string version)
+        {
+            string key = $"{Application.productName}_{packageName}_BuildVersion";
+            EditorPrefs.SetString(key, version);
+        }
+        // EBuildMode
+        public static EBuildMode GetPackageBuildMode(EBuildPipeline buildPipeline)
+        {
+            string key = $"{Application.productName}_{buildPipeline}_{nameof(EBuildMode)}";
             return (EBuildMode)EditorPrefs.GetInt(key, (int)EBuildMode.ForceRebuild);
         }
-        public static void SetPackageBuildMode(string packageName, EBuildPipeline buildPipeline, EBuildMode buildMode)
+        public static void SetPackageBuildMode(EBuildPipeline buildPipeline, EBuildMode buildMode)
         {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_{nameof(EBuildMode)}";
+            string key = $"{Application.productName}_{buildPipeline}_{nameof(EBuildMode)}";
             EditorPrefs.SetInt(key, (int)buildMode);
         }
 
-        // ECompressOption
-        public static ECompressOption GetPackageCompressOption(string packageName, EBuildPipeline buildPipeline)
-        {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_{nameof(ECompressOption)}";
-            return (ECompressOption)EditorPrefs.GetInt(key, (int)ECompressOption.LZ4);
-        }
-        public static void SetPackageCompressOption(string packageName, EBuildPipeline buildPipeline, ECompressOption compressOption)
-        {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_{nameof(ECompressOption)}";
-            EditorPrefs.SetInt(key, (int)compressOption);
-        }
-
-        // EFileNameStyle
-        public static EFileNameStyle GetPackageFileNameStyle(string packageName, EBuildPipeline buildPipeline)
-        {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_{nameof(EFileNameStyle)}";
-            return (EFileNameStyle)EditorPrefs.GetInt(key, (int)EFileNameStyle.HashName);
-        }
-        public static void SetPackageFileNameStyle(string packageName, EBuildPipeline buildPipeline, EFileNameStyle fileNameStyle)
-        {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_{nameof(EFileNameStyle)}";
-            EditorPrefs.SetInt(key, (int)fileNameStyle);
-        }
-
-        // EBuildinFileCopyOption
-        public static EBuildinFileCopyOption GetPackageBuildinFileCopyOption(string packageName, EBuildPipeline buildPipeline)
-        {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_{nameof(EBuildinFileCopyOption)}";
-            return (EBuildinFileCopyOption)EditorPrefs.GetInt(key, (int)EBuildinFileCopyOption.None);
-        }
-        public static void SetPackageBuildinFileCopyOption(string packageName, EBuildPipeline buildPipeline, EBuildinFileCopyOption buildinFileCopyOption)
-        {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_{nameof(EBuildinFileCopyOption)}";
-            EditorPrefs.SetInt(key, (int)buildinFileCopyOption);
-        }
-
-        // BuildFileCopyParams
-        public static string GetPackageBuildinFileCopyParams(string packageName, EBuildPipeline buildPipeline)
-        {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_BuildFileCopyParams";
-            return EditorPrefs.GetString(key, string.Empty);
-        }
-        public static void SetPackageBuildinFileCopyParams(string packageName, EBuildPipeline buildPipeline, string buildinFileCopyParams)
-        {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_BuildFileCopyParams";
-            EditorPrefs.SetString(key, buildinFileCopyParams);
-        }
-
         // EncyptionClassName
-        public static string GetPackageEncyptionClassName(string packageName, EBuildPipeline buildPipeline)
+        public static string GetPackageEncyptionClassName(EBuildPipeline buildPipeline)
         {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_EncyptionClassName";
+            string key = $"{Application.productName}_{buildPipeline}_EncyptionClassName";
             return EditorPrefs.GetString(key, string.Empty);
         }
-        public static void SetPackageEncyptionClassName(string packageName, EBuildPipeline buildPipeline, string encyptionClassName)
+        public static void SetPackageEncyptionClassName(EBuildPipeline buildPipeline, string encyptionClassName)
         {
-            string key = $"{Application.productName}_{packageName}_{buildPipeline}_EncyptionClassName";
+            string key = $"{Application.productName}_{buildPipeline}_EncyptionClassName";
             EditorPrefs.SetString(key, encyptionClassName);
+        }
+
+        //bool 
+
+        public static bool GetPackageVal(string name)
+        {
+            var key = $"{Application.productName}_{name}_bool";
+            return EditorPrefs.GetBool(key, false);
+        }
+        public static void SetPackageVal(string name, bool val)
+        {
+            string key = $"{Application.productName}_{name}_bool";
+            EditorPrefs.SetBool(key, val);
         }
     }
 }

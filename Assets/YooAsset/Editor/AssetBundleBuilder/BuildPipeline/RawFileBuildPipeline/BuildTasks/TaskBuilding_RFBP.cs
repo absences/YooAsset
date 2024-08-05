@@ -26,13 +26,11 @@ namespace YooAsset.Editor
         private void CopyRawBundle(BuildMapContext buildMapContext, BuildParametersContext buildParametersContext)
         {
             string pipelineOutputDirectory = buildParametersContext.GetPipelineOutputDirectory();
-            foreach (var bundleInfo in buildMapContext.Collection)
+            foreach (var bundleInfo in buildMapContext.Collection.Values)
             {
                 string dest = $"{pipelineOutputDirectory}/{bundleInfo.BundleName}";
-                foreach (var buildAsset in bundleInfo.MainAssets)
-                {
-                    EditorTools.CopyFile(buildAsset.AssetInfo.AssetPath, dest, true);
-                }
+                string from = bundleInfo.BundlePath;
+                EditorTools.CopyFile(from, dest, true);
             }
         }
     }

@@ -37,7 +37,7 @@ namespace YooAsset
                     DownloadParam downloadParam = new DownloadParam(int.MaxValue, 60);
                     string fileLoadPath = _fileSystem.GetWebFileLoadPath(_bundle);
                     downloadParam.MainURL = DownloadSystemHelper.ConvertToWWWPath(fileLoadPath);
-                    downloadParam.FallbackURL = downloadParam.MainURL;
+                 //   downloadParam.FallbackURL = downloadParam.MainURL;
                     _downloadhanlderAssetBundleOp = new DownloadHandlerAssetBundleOperation(_fileSystem, _bundle, downloadParam);
                     OperationSystem.StartOperation(_fileSystem.PackageName, _downloadhanlderAssetBundleOp);
                 }

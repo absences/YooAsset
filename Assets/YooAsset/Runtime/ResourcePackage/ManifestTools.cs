@@ -35,8 +35,8 @@ namespace YooAsset
                 buffer.WriteUTF8(manifest.FileVersion);
 
                 // 写入文件头信息
-                buffer.WriteBool(manifest.EnableAddressable);
-                buffer.WriteBool(manifest.LocationToLower);
+                //buffer.WriteBool(manifest.EnableAddressable);
+                //buffer.WriteBool(manifest.LocationToLower);
                 buffer.WriteBool(manifest.IncludeAssetGUID);
                 buffer.WriteInt32(manifest.OutputNameStyle);
                 buffer.WriteUTF8(manifest.BuildPipeline);
@@ -48,7 +48,7 @@ namespace YooAsset
                 for (int i = 0; i < manifest.AssetList.Count; i++)
                 {
                     var packageAsset = manifest.AssetList[i];
-                    buffer.WriteUTF8(packageAsset.Address);
+                    //buffer.WriteUTF8(packageAsset.Address);
                     buffer.WriteUTF8(packageAsset.AssetPath);
                     buffer.WriteUTF8(packageAsset.AssetGUID);
                     buffer.WriteUTF8Array(packageAsset.AssetTags);
@@ -106,8 +106,8 @@ namespace YooAsset
             {
                 // 读取文件头信息
                 manifest.FileVersion = fileVersion;
-                manifest.EnableAddressable = buffer.ReadBool();
-                manifest.LocationToLower = buffer.ReadBool();
+                //manifest.EnableAddressable = buffer.ReadBool();
+                //manifest.LocationToLower = buffer.ReadBool();
                 manifest.IncludeAssetGUID = buffer.ReadBool();
                 manifest.OutputNameStyle = buffer.ReadInt32();
                 manifest.BuildPipeline = buffer.ReadUTF8();
@@ -115,16 +115,17 @@ namespace YooAsset
                 manifest.PackageVersion = buffer.ReadUTF8();
 
                 // 检测配置
-                if (manifest.EnableAddressable && manifest.LocationToLower)
-                    throw new Exception("Addressable not support location to lower !");
+               // if (manifest.EnableAddressable && manifest.LocationToLower)
+                //    throw new Exception("Addressable not support location to lower !");
 
                 // 读取资源列表
                 int packageAssetCount = buffer.ReadInt32();
+
                 manifest.AssetList = new List<PackageAsset>(packageAssetCount);
                 for (int i = 0; i < packageAssetCount; i++)
                 {
                     var packageAsset = new PackageAsset();
-                    packageAsset.Address = buffer.ReadUTF8();
+                    //packageAsset.Address = buffer.ReadUTF8();
                     packageAsset.AssetPath = buffer.ReadUTF8();
                     packageAsset.AssetGUID = buffer.ReadUTF8();
                     packageAsset.AssetTags = buffer.ReadUTF8Array();
@@ -217,7 +218,7 @@ namespace YooAsset
             }
             else if (nameStyle == (int)EFileNameStyle.BundleName)
             {
-                return bundleName;
+                return bundleName.Replace("/", "_");
             }
             else if (nameStyle == (int)EFileNameStyle.BundleName_HashName)
             {

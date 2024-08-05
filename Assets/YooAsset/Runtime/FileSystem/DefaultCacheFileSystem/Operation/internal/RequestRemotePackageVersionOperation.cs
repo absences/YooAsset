@@ -14,7 +14,7 @@ namespace YooAsset
         private readonly bool _appendTimeTicks;
         private readonly int _timeout;
         private UnityWebTextRequestOperation _webTextRequestOp;
-        private int _requestCount = 0;
+       // private int _requestCount = 0;
         private ESteps _steps = ESteps.None;
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace YooAsset
         }
         internal override void InternalOnStart()
         {
-            _requestCount = WebRequestCounter.GetRequestFailedCount(_fileSystem.PackageName, nameof(RequestRemotePackageVersionOperation));
+            //_requestCount = WebRequestCounter.GetRequestFailedCount(_fileSystem.PackageName, nameof(RequestRemotePackageVersionOperation));
             _steps = ESteps.RequestPackageVersion;
         }
         internal override void InternalOnUpdate()
@@ -44,7 +44,7 @@ namespace YooAsset
                 if (_webTextRequestOp == null)
                 {
                     string fileName = YooAssetSettingsData.GetPackageVersionFileName(_fileSystem.PackageName);
-                    string url = GetWebRequestURL(fileName);
+                    string url = GetWebRequestURL(_fileSystem.PackageName, fileName);
                     _webTextRequestOp = new UnityWebTextRequestOperation(url, _timeout);
                     OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
                 }
@@ -78,15 +78,15 @@ namespace YooAsset
             }
         }
 
-        private string GetWebRequestURL(string fileName)
+        private string GetWebRequestURL(string package, string fileName)
         {
             string url;
 
             // 轮流返回请求地址
-            if (_requestCount % 2 == 0)
-                url = _fileSystem.RemoteServices.GetRemoteMainURL(fileName);
-            else
-                url = _fileSystem.RemoteServices.GetRemoteFallbackURL(fileName);
+            //if (_requestCount % 2 == 0)
+                url = _fileSystem.RemoteServices.GetRemoteMainURL(package, fileName);
+          //  else
+               // url = _fileSystem.RemoteServices.GetRemoteFallbackURL(fileName);
 
             // 在URL末尾添加时间戳
             if (_appendTimeTicks)

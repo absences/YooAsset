@@ -3,8 +3,18 @@ namespace YooAsset
 {
     public class AssetInfo
     {
+        /// <summary>
+        /// 资源路径对应PackageAsset
+        /// </summary>
         private readonly PackageAsset _packageAsset;
         private string _providerGUID;
+
+        /// <summary>
+        /// 资源所属Bundle
+        /// </summary>
+        private PackageBundle _packageBundle;
+
+        internal PackageBundle PackageBundle { get { return _packageBundle; } }
 
         /// <summary>
         /// 所属包裹
@@ -43,27 +53,28 @@ namespace YooAsset
         /// <summary>
         /// 身份是否无效
         /// </summary>
-        public bool IsInvalid
+        internal bool IsInvalid
         {
             get
             {
-                return _packageAsset == null;
+                return _packageAsset == null && _packageBundle == null;
             }
         }
 
-        /// <summary>
-        /// 可寻址地址
-        /// </summary>
-        public string Address
-        {
-            get
-            {
-                if (_packageAsset == null)
-                    return string.Empty;
-                return _packageAsset.Address;
-            }
-        }
+        ///// <summary>
+        ///// 可寻址地址
+        ///// </summary>
+        //public string Address
+        //{
+        //    get
+        //    {
+        //        if (_packageAsset == null)
+        //            return string.Empty;
+        //        return _packageAsset.Address;
+        //    }
+        //}
 
+        private string _assetPath;
         /// <summary>
         /// 资源路径
         /// </summary>
@@ -71,12 +82,20 @@ namespace YooAsset
         {
             get
             {
+                if (_packageBundle != null)
+                    return _assetPath;
+
                 if (_packageAsset == null)
                     return string.Empty;
                 return _packageAsset.AssetPath;
             }
         }
 
+
+        private AssetInfo()
+        {
+            // 注意：禁止从外部创建该类
+        }
         internal AssetInfo(string packageName, PackageAsset packageAsset, System.Type assetType)
         {
             if (packageAsset == null)
@@ -95,6 +114,19 @@ namespace YooAsset
             PackageName = packageName;
             AssetType = null;
             Error = error;
+        }
+
+        internal AssetInfo(string packageName, PackageBundle packageBundle, string assetName, System.Type assetType)
+        {
+            if (packageBundle == null)
+                throw new System.Exception("Should never get here !");
+
+            _packageAsset = null;
+            _assetPath = assetName;
+            _providerGUID = string.Empty;
+            _packageBundle = packageBundle;
+            PackageName = packageName;
+            AssetType = assetType;
         }
     }
 }

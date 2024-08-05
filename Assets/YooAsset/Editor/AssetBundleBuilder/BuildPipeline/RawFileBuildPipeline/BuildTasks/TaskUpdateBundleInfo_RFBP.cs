@@ -1,14 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
-
-namespace YooAsset.Editor
+﻿namespace YooAsset.Editor
 {
     public class TaskUpdateBundleInfo_RFBP : TaskUpdateBundleInfo, IBuildTask
     {
-        void IBuildTask.Run(BuildContext context)
+        public void Run(BuildContext context)
         {
             UpdateBundleInfo(context);
         }
@@ -18,11 +12,11 @@ namespace YooAsset.Editor
             var buildParametersContext = context.GetContextObject<BuildParametersContext>();
             var parameters = buildParametersContext.Parameters;
             var buildMode = parameters.BuildMode;
-            if (buildMode == EBuildMode.SimulateBuild)
-            {
-                return "00000000000000000000000000000000"; //32位
-            }
-            else
+            //if (buildMode == EBuildMode.SimulateBuild)
+            //{
+            //    return "00000000000000000000000000000000"; //32位
+            //}
+            //else
             {
                 string filePath = bundleInfo.PackageSourceFilePath;
                 return HashUtility.FileMD5(filePath);
@@ -36,28 +30,28 @@ namespace YooAsset.Editor
         {
             string filePath = bundleInfo.PackageSourceFilePath;
             var buildMode = buildParametersContext.Parameters.BuildMode;
-            if (buildMode == EBuildMode.SimulateBuild)
-                return GetFilePathTempHash(filePath);
-            else
-                return HashUtility.FileMD5(filePath);
+            //if (buildMode == EBuildMode.SimulateBuild)
+            //    return GetFilePathTempHash(filePath);
+            //else
+            return HashUtility.FileMD5(filePath);
         }
         protected override string GetBundleFileCRC(BuildBundleInfo bundleInfo, BuildParametersContext buildParametersContext)
         {
             string filePath = bundleInfo.PackageSourceFilePath;
             var buildMode = buildParametersContext.Parameters.BuildMode;
-            if (buildMode == EBuildMode.SimulateBuild)
-                return "00000000"; //8位
-            else
-                return HashUtility.FileCRC32(filePath);
+            //if (buildMode == EBuildMode.SimulateBuild)
+            //    return "00000000"; //8位
+            //else
+            return HashUtility.FileCRC32(filePath);
         }
         protected override long GetBundleFileSize(BuildBundleInfo bundleInfo, BuildParametersContext buildParametersContext)
         {
             string filePath = bundleInfo.PackageSourceFilePath;
             var buildMode = buildParametersContext.Parameters.BuildMode;
-            if (buildMode == EBuildMode.SimulateBuild)
-                return GetBundleTempSize(bundleInfo);
-            else
-                return FileUtility.GetFileSize(filePath);
+            //if (buildMode == EBuildMode.SimulateBuild)
+            //    return GetBundleTempSize(bundleInfo);
+            //else
+            return FileUtility.GetFileSize(filePath);
         }
     }
 }

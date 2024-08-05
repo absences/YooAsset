@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,11 +18,7 @@ namespace YooAsset
             {
                 _buildinPackageRoot = buildinPackRoot;
             }
-            string IRemoteServices.GetRemoteMainURL(string fileName)
-            {
-                return GetFileLoadURL(fileName);
-            }
-            string IRemoteServices.GetRemoteFallbackURL(string fileName)
+            string IRemoteServices.GetRemoteMainURL(string package, string fileName)
             {
                 return GetFileLoadURL(fileName);
             }
@@ -111,13 +106,19 @@ namespace YooAsset
         }
         public virtual FSInitializeFileSystemOperation InitializeFileSystemAsync()
         {
+#if UNITY_EDITOR||FILE_UTIL//不使用内置清单
+            var operation = new DBFSInitializeInEditorPlayModeOperation(this);
+            OperationSystem.StartOperation(PackageName, operation);
+            return operation;
+#else
             var operation = new DBFSInitializeOperation(this);
             OperationSystem.StartOperation(PackageName, operation);
             return operation;
+#endif
         }
         public virtual FSLoadPackageManifestOperation LoadPackageManifestAsync(string packageVersion, int timeout)
         {
-            var operation = new DBFSLoadPackageManifestOperation(this, packageVersion);
+            var operation = new DBFSLoadPackageManifestOperation(this);
             OperationSystem.StartOperation(PackageName, operation);
             return operation;
         }
@@ -268,7 +269,7 @@ namespace YooAsset
 
             if (Exists(bundle) == false)
                 return null;
-
+            string filePath = GetBuildinFileLoadPath(bundle);
             if (bundle.Encrypted)
             {
                 if (DecryptionServices == null)
@@ -276,8 +277,7 @@ namespace YooAsset
                     YooLogger.Error($"The {nameof(IDecryptionServices)} is null !");
                     return null;
                 }
-
-                string filePath = GetBuildinFileLoadPath(bundle);
+             
                 var fileInfo = new DecryptFileInfo()
                 {
                     BundleName = bundle.BundleName,
@@ -286,11 +286,7 @@ namespace YooAsset
                 };
                 return DecryptionServices.ReadFileData(fileInfo);
             }
-            else
-            {
-                string filePath = GetBuildinFileLoadPath(bundle);
-                return FileUtility.ReadAllBytes(filePath);
-            }
+            return FileUtility.ReadAllBytes(filePath);
         }
         public virtual string ReadFileText(PackageBundle bundle)
         {
@@ -300,6 +296,8 @@ namespace YooAsset
             if (Exists(bundle) == false)
                 return null;
 
+            string filePath = GetBuildinFileLoadPath(bundle);
+
             if (bundle.Encrypted)
             {
                 if (DecryptionServices == null)
@@ -307,8 +305,6 @@ namespace YooAsset
                     YooLogger.Error($"The {nameof(IDecryptionServices)} is null !");
                     return null;
                 }
-
-                string filePath = GetBuildinFileLoadPath(bundle);
                 var fileInfo = new DecryptFileInfo()
                 {
                     BundleName = bundle.BundleName,
@@ -317,17 +313,13 @@ namespace YooAsset
                 };
                 return DecryptionServices.ReadFileText(fileInfo);
             }
-            else
-            {
-                string filePath = GetBuildinFileLoadPath(bundle);
-                return FileUtility.ReadAllText(filePath);
-            }
+            return FileUtility.ReadAllText(filePath);
         }
-
+       
         #region 内部方法
         protected string GetDefaultRoot()
         {
-            return PathUtility.Combine(Application.streamingAssetsPath, YooAssetSettingsData.Setting.DefaultYooFolderName);
+            return Application.streamingAssetsPath;
         }
         public string GetBuildinFileLoadPath(PackageBundle bundle)
         {
@@ -341,7 +333,7 @@ namespace YooAsset
         public string GetBuildinCatalogFileLoadPath()
         {
             string fileName = Path.GetFileNameWithoutExtension(DefaultBuildinFileSystemDefine.BuildinCatalogFileName);
-            return PathUtility.Combine(YooAssetSettingsData.Setting.DefaultYooFolderName, PackageName, fileName);
+            return PathUtility.Combine(PackageName, fileName);
         }
         public string GetBuildinPackageVersionFilePath()
         {
@@ -357,11 +349,6 @@ namespace YooAsset
         {
             string fileName = YooAssetSettingsData.GetManifestBinaryFileName(PackageName, packageVersion);
             return PathUtility.Combine(FileRoot, fileName);
-        }
-        public string GetStreamingAssetsPackageRoot()
-        {
-            string rootPath = PathUtility.Combine(Application.dataPath, "StreamingAssets", YooAssetSettingsData.Setting.DefaultYooFolderName);
-            return PathUtility.Combine(rootPath, PackageName);
         }
 
         /// <summary>

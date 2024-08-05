@@ -22,7 +22,33 @@ namespace YooAsset.Editor
         /// </summary>
         public static string GetStreamingAssetsRoot()
         {
-            return $"{Application.dataPath}/StreamingAssets/{YooAssetSettingsData.Setting.DefaultYooFolderName}/";
+            return $"{Application.dataPath}/StreamingAssets/";
+        }
+
+        /// <summary>
+        /// 获取client临时输出根路录
+        /// </summary>
+        public static string GetClientBuildOutputRoot()
+        {
+            string projectPath = EditorTools.GetProjectPath();
+            return $"{projectPath}/../../client/project_s_client/Bundles";
+        }
+
+        /// <summary>
+        /// 获取client手动构建输出根路录
+        /// </summary>
+        public static string GetManualClientBuildOutputRoot()
+        {
+            string projectPath = EditorTools.GetProjectPath();
+            return $"{projectPath}/game_assets";
+        }
+        /// <summary>
+        /// 获取assets输出根路录
+        /// </summary>
+        public static string GetAssetsOutputRoot()
+        {
+            string projectPath = EditorTools.GetProjectPath();
+            return $"{projectPath}/game_assets";
         }
     }
 }

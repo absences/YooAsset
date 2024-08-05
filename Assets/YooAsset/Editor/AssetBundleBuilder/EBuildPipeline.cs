@@ -14,7 +14,7 @@ namespace YooAsset.Editor
         /// <summary>
         /// 可编程构建管线 (SBP)
         /// </summary>
-        ScriptableBuildPipeline,
+       // ScriptableBuildPipeline,
 
         /// <summary>
         /// 原生文件构建管线 (RFBP)

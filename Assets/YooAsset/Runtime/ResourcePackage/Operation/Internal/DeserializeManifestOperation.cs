@@ -76,8 +76,8 @@ namespace YooAsset
                     // 读取文件头信息
                     Manifest = new PackageManifest();
                     Manifest.FileVersion = fileVersion;
-                    Manifest.EnableAddressable = _buffer.ReadBool();
-                    Manifest.LocationToLower = _buffer.ReadBool();
+                    //Manifest.EnableAddressable = _buffer.ReadBool();
+                    //Manifest.LocationToLower = _buffer.ReadBool();
                     Manifest.IncludeAssetGUID = _buffer.ReadBool();
                     Manifest.OutputNameStyle = _buffer.ReadInt32();
                     Manifest.BuildPipeline = _buffer.ReadUTF8();
@@ -85,8 +85,8 @@ namespace YooAsset
                     Manifest.PackageVersion = _buffer.ReadUTF8();
 
                     // 检测配置
-                    if (Manifest.EnableAddressable && Manifest.LocationToLower)
-                        throw new System.Exception("Addressable not support location to lower !");
+                    //if (Manifest.EnableAddressable && Manifest.LocationToLower)
+                    //   throw new System.Exception("Addressable not support location to lower !");
 
                     _steps = ESteps.PrepareAssetList;
                 }
@@ -97,10 +97,8 @@ namespace YooAsset
                     Manifest.AssetList = new List<PackageAsset>(_packageAssetCount);
                     Manifest.AssetDic = new Dictionary<string, PackageAsset>(_packageAssetCount);
 
-                    if (Manifest.EnableAddressable)
-                        Manifest.AssetPathMapping1 = new Dictionary<string, string>(_packageAssetCount * 3);
-                    else
-                        Manifest.AssetPathMapping1 = new Dictionary<string, string>(_packageAssetCount * 2);
+                    
+                        Manifest.AssetPathMapping1 = new List<string>(_packageAssetCount);
 
                     if (Manifest.IncludeAssetGUID)
                         Manifest.AssetPathMapping2 = new Dictionary<string, string>(_packageAssetCount);
@@ -115,7 +113,7 @@ namespace YooAsset
                     while (_packageAssetCount > 0)
                     {
                         var packageAsset = new PackageAsset();
-                        packageAsset.Address = _buffer.ReadUTF8();
+                        //packageAsset.Address = _buffer.ReadUTF8();
                         packageAsset.AssetPath = _buffer.ReadUTF8();
                         packageAsset.AssetGUID = _buffer.ReadUTF8();
                         packageAsset.AssetTags = _buffer.ReadUTF8Array();
@@ -132,36 +130,16 @@ namespace YooAsset
                         // 填充AssetPathMapping1
                         {
                             string location = packageAsset.AssetPath;
-                            if (Manifest.LocationToLower)
-                                location = location.ToLower();
+                            //if (Manifest.LocationToLower)
+                            //    location = location.ToLower();
 
                             // 添加原生路径的映射
-                            if (Manifest.AssetPathMapping1.ContainsKey(location))
+                            if (Manifest.AssetPathMapping1.Contains(location))
                                 throw new System.Exception($"Location have existed : {location}");
                             else
-                                Manifest.AssetPathMapping1.Add(location, packageAsset.AssetPath);
+                                Manifest.AssetPathMapping1.Add(location);
 
-                            // 添加无后缀名路径的映射
-                            string locationWithoutExtension = Path.ChangeExtension(location, null);
-                            if (ReferenceEquals(location, locationWithoutExtension) == false)
-                            {
-                                if (Manifest.AssetPathMapping1.ContainsKey(locationWithoutExtension))
-                                    YooLogger.Warning($"Location have existed : {locationWithoutExtension}");
-                                else
-                                    Manifest.AssetPathMapping1.Add(locationWithoutExtension, packageAsset.AssetPath);
                             }
-                        }
-                        if (Manifest.EnableAddressable)
-                        {
-                            string location = packageAsset.Address;
-                            if (string.IsNullOrEmpty(location) == false)
-                            {
-                                if (Manifest.AssetPathMapping1.ContainsKey(location))
-                                    throw new System.Exception($"Location have existed : {location}");
-                                else
-                                    Manifest.AssetPathMapping1.Add(location, packageAsset.AssetPath);
-                            }
-                        }
 
                         // 填充AssetPathMapping2
                         if (Manifest.IncludeAssetGUID)

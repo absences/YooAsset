@@ -77,17 +77,18 @@ namespace YooAsset
             // 创建资源管理器
             InitializationOperation initializeOperation;
             _resourceManager = new ResourceManager(PackageName);
-            if (_playMode == EPlayMode.EditorSimulateMode)
-            {
-                var editorSimulateModeImpl = new EditorSimulateModeImpl(PackageName);
-                _bundleQuery = editorSimulateModeImpl;
-                _playModeImpl = editorSimulateModeImpl;
-                _resourceManager.Initialize(parameters, _bundleQuery);
+            //if (_playMode == EPlayMode.EditorSimulateMode)
+            //{
+            //    var editorSimulateModeImpl = new EditorSimulateModeImpl(PackageName);
+            //    _bundleQuery = editorSimulateModeImpl;
+            //    _playModeImpl = editorSimulateModeImpl;
+            //    _resourceManager.Initialize(parameters, _bundleQuery);
 
-                var initializeParameters = parameters as EditorSimulateModeParameters;
-                initializeOperation = editorSimulateModeImpl.InitializeAsync(initializeParameters);
-            }
-            else if (_playMode == EPlayMode.OfflinePlayMode)
+            //    var initializeParameters = parameters as EditorSimulateModeParameters;
+            //    initializeOperation = editorSimulateModeImpl.InitializeAsync(initializeParameters);
+            //}
+            //else
+            if (_playMode == EPlayMode.OfflinePlayMode)
             {
                 var offlinePlayModeImpl = new OfflinePlayModeImpl(PackageName);
                 _bundleQuery = offlinePlayModeImpl;
@@ -121,7 +122,6 @@ namespace YooAsset
             {
                 throw new NotImplementedException();
             }
-
             // 监听初始化结果
             _isInitialize = true;
             initializeOperation.Completed += InitializeOperation_Completed;
@@ -144,15 +144,12 @@ namespace YooAsset
             if (parameters == null)
                 throw new Exception($"{nameof(ResourcePackage)} create parameters is null.");
 
-#if !UNITY_EDITOR
-            if (parameters is EditorSimulateModeParameters)
-                throw new Exception($"Editor simulate mode only support unity editor.");
-#endif
 
             // 鉴定运行模式
-            if (parameters is EditorSimulateModeParameters)
-                _playMode = EPlayMode.EditorSimulateMode;
-            else if (parameters is OfflinePlayModeParameters)
+           // if (parameters is EditorSimulateModeParameters)
+            //    _playMode = EPlayMode.EditorSimulateMode;
+           // else 
+            if (parameters is OfflinePlayModeParameters)
                 _playMode = EPlayMode.OfflinePlayMode;
             else if (parameters is HostPlayModeParameters)
                 _playMode = EPlayMode.HostPlayMode;
@@ -162,7 +159,7 @@ namespace YooAsset
                 throw new NotImplementedException();
 
             // 检测运行时平台
-            if (_playMode != EPlayMode.EditorSimulateMode)
+            //if (_playMode != EPlayMode.EditorSimulateMode)
             {
 #if UNITY_WEBGL
                 if (_playMode != EPlayMode.WebPlayMode)
@@ -214,10 +211,10 @@ namespace YooAsset
             DebugCheckInitialize(false);
 
             // 注意：强烈建议在更新之前保持加载器为空！
-            if (_resourceManager.HasAnyLoader())
-            {
-                YooLogger.Warning($"Found loaded bundle before update manifest ! Recommended to call the  {nameof(UnloadAllAssetsAsync)} method to release loaded bundle !");
-            }
+            //if (_resourceManager.HasAnyLoader())
+            //{
+            //  YooLogger.Warning($"Found loaded bundle before update manifest ! Recommended to call the  {nameof(UnloadAllAssetsAsync)} method to release loaded bundle !");
+            //}
 
             return _playModeImpl.UpdatePackageManifestAsync(packageVersion, timeout);
         }
@@ -340,6 +337,15 @@ namespace YooAsset
         }
 
         /// <summary>
+        /// 获取资源信息 没有name返回第一个
+        /// </summary>
+        /// <param name="location">资源的定位地址</param>
+        public AssetInfo GetAssetInfoByBundle(string bundle, string name, System.Type assetType)
+        {
+            DebugCheckInitialize();
+            return TryGetPackageBundleByBundleName(bundle, name, assetType);
+        }
+        /// <summary>
         /// 获取资源信息列表
         /// </summary>
         /// <param name="tags">资源标签列表</param>
@@ -398,8 +404,7 @@ namespace YooAsset
         public bool CheckLocationValid(string location)
         {
             DebugCheckInitialize();
-            string assetPath = _playModeImpl.ActiveManifest.TryMappingToAssetPath(location);
-            return string.IsNullOrEmpty(assetPath) == false;
+            return _playModeImpl.ActiveManifest.TryMappingToAssetPath(location);
         }
 
         private bool IsNeedDownloadFromRemoteInternal(AssetInfo assetInfo)
@@ -486,11 +491,11 @@ namespace YooAsset
         /// </summary>
         /// <param name="location">场景的定位地址</param>
         /// <param name="sceneMode">场景加载模式</param>
-        public SceneHandle LoadSceneSync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None)
+        public SceneHandle LoadSceneSync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single)
         {
             DebugCheckInitialize();
             AssetInfo assetInfo = ConvertLocationToAssetInfo(location, null);
-            return LoadSceneInternal(assetInfo, true, sceneMode, physicsMode, false, 0);
+            return LoadSceneInternal(assetInfo, true, sceneMode, false, 0);
         }
 
         /// <summary>
@@ -498,10 +503,10 @@ namespace YooAsset
         /// </summary>
         /// <param name="assetInfo">场景的资源信息</param>
         /// <param name="sceneMode">场景加载模式</param>
-        public SceneHandle LoadSceneSync(AssetInfo assetInfo, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None)
+        public SceneHandle LoadSceneSync(AssetInfo assetInfo, LoadSceneMode sceneMode = LoadSceneMode.Single)
         {
             DebugCheckInitialize();
-            return LoadSceneInternal(assetInfo, true, sceneMode, physicsMode, false, 0);
+            return LoadSceneInternal(assetInfo, true, sceneMode, false, 0);
         }
 
         /// <summary>
@@ -511,11 +516,11 @@ namespace YooAsset
         /// <param name="sceneMode">场景加载模式</param>
         /// <param name="suspendLoad">场景加载到90%自动挂起</param>
         /// <param name="priority">加载的优先级</param>
-        public SceneHandle LoadSceneAsync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None, bool suspendLoad = false, uint priority = 0)
+        public SceneHandle LoadSceneAsync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single, bool suspendLoad = false, uint priority = 0)
         {
             DebugCheckInitialize();
             AssetInfo assetInfo = ConvertLocationToAssetInfo(location, null);
-            return LoadSceneInternal(assetInfo, false, sceneMode, physicsMode, suspendLoad, priority);
+            return LoadSceneInternal(assetInfo, false, sceneMode, suspendLoad, priority);
         }
 
         /// <summary>
@@ -525,17 +530,16 @@ namespace YooAsset
         /// <param name="sceneMode">场景加载模式</param>
         /// <param name="suspendLoad">场景加载到90%自动挂起</param>
         /// <param name="priority">加载的优先级</param>
-        public SceneHandle LoadSceneAsync(AssetInfo assetInfo, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None, bool suspendLoad = false, uint priority = 0)
+        public SceneHandle LoadSceneAsync(AssetInfo assetInfo, LoadSceneMode sceneMode = LoadSceneMode.Single, bool suspendLoad = false, uint priority = 0)
         {
             DebugCheckInitialize();
-            return LoadSceneInternal(assetInfo, false, sceneMode, physicsMode, suspendLoad, priority);
+            return LoadSceneInternal(assetInfo, false, sceneMode, suspendLoad, priority);
         }
 
-        private SceneHandle LoadSceneInternal(AssetInfo assetInfo, bool waitForAsyncComplete, LoadSceneMode sceneMode, LocalPhysicsMode physicsMode, bool suspendLoad, uint priority)
+        private SceneHandle LoadSceneInternal(AssetInfo assetInfo, bool waitForAsyncComplete, LoadSceneMode sceneMode, bool suspendLoad, uint priority)
         {
             DebugCheckAssetLoadType(assetInfo.AssetType);
-            var loadSceneParams = new LoadSceneParameters(sceneMode, physicsMode);
-            var handle = _resourceManager.LoadSceneAsync(assetInfo, loadSceneParams, suspendLoad, priority);
+            var handle = _resourceManager.LoadSceneAsync(assetInfo, sceneMode, suspendLoad, priority);
             if (waitForAsyncComplete)
                 handle.WaitForAsyncComplete();
             return handle;
@@ -889,10 +893,10 @@ namespace YooAsset
         /// <param name="downloadingMaxNumber">同时下载的最大文件数</param>
         /// <param name="failedTryAgain">下载失败的重试次数</param>
         /// <param name="timeout">超时时间</param>
-        public ResourceDownloaderOperation CreateResourceDownloader(string tag, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
+        public ResourceDownloaderOperation CreateResourceDownloader(string tag, bool includeTags, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
         {
             DebugCheckInitialize();
-            return _playModeImpl.CreateResourceDownloaderByTags(new string[] { tag }, downloadingMaxNumber, failedTryAgain, timeout);
+            return _playModeImpl.CreateResourceDownloaderByTags(new string[] { tag }, includeTags, downloadingMaxNumber, failedTryAgain, timeout);
         }
 
         /// <summary>
@@ -902,10 +906,10 @@ namespace YooAsset
         /// <param name="downloadingMaxNumber">同时下载的最大文件数</param>
         /// <param name="failedTryAgain">下载失败的重试次数</param>
         /// <param name="timeout">超时时间</param>
-        public ResourceDownloaderOperation CreateResourceDownloader(string[] tags, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
+        public ResourceDownloaderOperation CreateResourceDownloader(string[] tags, bool includeTags, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
         {
             DebugCheckInitialize();
-            return _playModeImpl.CreateResourceDownloaderByTags(tags, downloadingMaxNumber, failedTryAgain, timeout);
+            return _playModeImpl.CreateResourceDownloaderByTags(tags, includeTags, downloadingMaxNumber, failedTryAgain, timeout);
         }
 
         /// <summary>
@@ -1031,7 +1035,22 @@ namespace YooAsset
         {
             return _playModeImpl.ActiveManifest.ConvertAssetGUIDToAssetInfo(assetGUID, assetType);
         }
-        #endregion
+ 		public AssetInfo TryGetPackageBundleByBundleName(string bundlename, string name, Type assetType)
+        {
+            if (_playModeImpl.ActiveManifest.TryGetPackageBundleByBundleName(bundlename, out PackageBundle bundle))
+            {
+                return new AssetInfo(_playModeImpl.ActiveManifest.PackageName, bundle, name, assetType);
+            }
+
+            string error;
+            if (string.IsNullOrEmpty(bundlename))
+                error = $"The assetis null or empty !";
+            else
+                error = $"The assetBundle is invalid : {bundlename}";
+            AssetInfo assetInfo = new AssetInfo(PackageName, error);
+            return assetInfo;
+        }        
+		#endregion
 
         #region 调试方法
         [Conditional("DEBUG")]

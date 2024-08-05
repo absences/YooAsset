@@ -62,7 +62,7 @@ namespace YooAsset
             }
             return result;
         }
-        public static List<BundleInfo> GetDownloadListByTags(PackageManifest manifest, string[] tags, IFileSystem fileSystemA = null, IFileSystem fileSystemB = null, IFileSystem fileSystemC = null)
+        public static List<BundleInfo> GetDownloadListByTags(PackageManifest manifest, string[] tags, bool includeTags, IFileSystem fileSystemA = null, IFileSystem fileSystemB = null, IFileSystem fileSystemC = null)
         {
             List<BundleInfo> result = new List<BundleInfo>(1000);
             foreach (var packageBundle in manifest.BundleList)
@@ -99,7 +99,7 @@ namespace YooAsset
                 else
                 {
                     // 查询DLC资源
-                    if (packageBundle.HasTag(tags))
+                    if (packageBundle.HasTag(tags) == includeTags)
                     {
                         var bundleInfo = new BundleInfo(fileSystem, packageBundle);
                         result.Add(bundleInfo);
@@ -126,7 +126,7 @@ namespace YooAsset
                     checkList.Add(mainBundle);
 
                 // 注意：如果清单里未找到资源包会抛出异常！
-                PackageBundle[] dependBundles = manifest.GetAllDependencies(assetInfo.AssetPath);
+                PackageBundle[] dependBundles = manifest.GetAllDependencies(assetInfo);
                 foreach (var dependBundle in dependBundles)
                 {
                     if (checkList.Contains(dependBundle) == false)

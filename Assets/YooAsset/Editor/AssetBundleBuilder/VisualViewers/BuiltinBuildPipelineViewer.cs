@@ -1,64 +1,58 @@
-﻿#if UNITY_2019_4_OR_NEWER
-using System;
-using System.IO;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
-using UnityEngine;
-using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
 namespace YooAsset.Editor
 {
-    internal class BuiltinBuildPipelineViewer : BuildPipelineViewerBase
+    public class BuiltinBuildPipelineViewer : BuildPipelineViewerBase
     {
-        public BuiltinBuildPipelineViewer(string packageName, BuildTarget buildTarget, VisualElement parent)
-            : base(packageName, EBuildPipeline.BuiltinBuildPipeline, buildTarget, parent)
+        public BuiltinBuildPipelineViewer(VisualElement parent)
+            : base(EBuildPipeline.BuiltinBuildPipeline, parent)
         {
+
         }
 
-        /// <summary>
-        /// 执行构建
-        /// </summary>
         protected override void ExecuteBuild()
         {
-            var buildMode = AssetBundleBuilderSetting.GetPackageBuildMode(PackageName, BuildPipeline);
-            var fileNameStyle = AssetBundleBuilderSetting.GetPackageFileNameStyle(PackageName, BuildPipeline);
-            var buildinFileCopyOption = AssetBundleBuilderSetting.GetPackageBuildinFileCopyOption(PackageName, BuildPipeline);
-            var buildinFileCopyParams = AssetBundleBuilderSetting.GetPackageBuildinFileCopyParams(PackageName, BuildPipeline);
-            var compressOption = AssetBundleBuilderSetting.GetPackageCompressOption(PackageName, BuildPipeline);
-
             BuiltinBuildParameters buildParameters = new BuiltinBuildParameters();
+            buildParameters.CleanMaterial = cleanMaterial.value;
+            buildParameters.BuildDebug = buildDebug.value;
+            buildParameters.MoveToClientPC = moveToClientPC.value;
+
             buildParameters.BuildOutputRoot = AssetBundleBuilderHelper.GetDefaultBuildOutputRoot();
-            buildParameters.BuildinFileRoot = AssetBundleBuilderHelper.GetStreamingAssetsRoot();
+            //buildParameters.BuildinFileRoot = AssetBundleBuilderHelper.GetStreamingAssetsRoot();
             buildParameters.BuildPipeline = BuildPipeline.ToString();
             buildParameters.BuildTarget = BuildTarget;
-            buildParameters.BuildMode = buildMode;
-            buildParameters.PackageName = PackageName;
-            buildParameters.PackageVersion = GetPackageVersion();
+            buildParameters.BuildMode = (EBuildMode)_buildModeField.value;
+            buildParameters.PackageName = YooAssetSettingsData.Setting.artName;
+            buildParameters.PackageVersion = AssetBundleBuilderSetting.GetPackageVersion("");
             buildParameters.EnableSharePackRule = true;
             buildParameters.VerifyBuildingResult = true;
-            buildParameters.FileNameStyle = fileNameStyle;
-            buildParameters.BuildinFileCopyOption = buildinFileCopyOption;
-            buildParameters.BuildinFileCopyParams = buildinFileCopyParams;
+            buildParameters.FileNameStyle = BuildTarget == UnityEditor.BuildTarget.StandaloneWindows64 ? EFileNameStyle.BundleName : EFileNameStyle.HashName;
+            //buildParameters.BuildinFileCopyOption = buildinFileCopyOption;
+            //buildParameters.BuildinFileCopyParams = buildinFileCopyParams;
             buildParameters.EncryptionServices = CreateEncryptionInstance();
-            buildParameters.CompressOption = compressOption;
+
+            buildParameters.CompressOption = ECompressOption.Uncompressed;
 
             BuiltinBuildPipeline pipeline = new BuiltinBuildPipeline();
             var buildResult = pipeline.Run(buildParameters, true);
+
             if (buildResult.Success)
-                EditorUtility.RevealInFinder(buildResult.OutputPackageDirectory);
+            {
+                //  EditorUtility.RevealInFinder(buildResult.OutputPackageDirectory);
+            }
         }
 
         protected override List<Enum> GetSupportBuildModes()
         {
-            List<Enum> buildModeList = new List<Enum>();
-            buildModeList.Add(EBuildMode.ForceRebuild);
-            buildModeList.Add(EBuildMode.IncrementalBuild);
-            buildModeList.Add(EBuildMode.DryRunBuild);
-            buildModeList.Add(EBuildMode.SimulateBuild);
+            List<Enum> buildModeList = new List<Enum>
+            {
+                EBuildMode.ForceRebuild,
+                EBuildMode.IncrementalBuild
+            };
             return buildModeList;
         }
+
     }
 }
-#endif

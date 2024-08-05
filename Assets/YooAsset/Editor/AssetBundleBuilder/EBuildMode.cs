@@ -19,11 +19,11 @@ namespace YooAsset.Editor
         /// <summary>
         /// 演练构建模式
         /// </summary>
-        DryRunBuild,
+        //DryRunBuild,
 
         /// <summary>
         /// 模拟构建模式
         /// </summary>
-        SimulateBuild,
+        //SimulateBuild,
     }
 }

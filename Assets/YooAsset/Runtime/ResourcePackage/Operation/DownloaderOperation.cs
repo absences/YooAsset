@@ -36,6 +36,7 @@ namespace YooAsset
         private long _cachedDownloadBytes = 0;
         private int _cachedDownloadCount = 0;
         private ESteps _steps = ESteps.None;
+        private float _currentSpeed;
 
 
         /// <summary>
@@ -63,7 +64,10 @@ namespace YooAsset
         {
             get { return _lastDownloadBytes; }
         }
-
+        public float CurrentSpeed
+        {
+            get { return _currentSpeed; }
+        }
         /// <summary>
         /// 当下载器结束（无论成功或失败）
         /// </summary>
@@ -147,7 +151,7 @@ namespace YooAsset
                     _cachedDownloadCount++;
                     _cachedDownloadBytes += (long)downloader.DownloadedBytes;
                 }
-
+                _currentSpeed = downloadBytes / UnityEngine.Time.time;
                 // 移除已经完成的下载器（无论成功或失败）
                 foreach (var downloader in _removeList)
                 {

@@ -23,7 +23,7 @@ namespace YooAsset
         // 请求相关
         protected UnityWebRequest _webRequest;
         protected string _requestURL;
-        protected int _requestCount = 0;
+        //protected int _requestCount = 0;
 
         // 超时相关
         protected bool _isAbort = false;
@@ -47,10 +47,10 @@ namespace YooAsset
         protected string GetRequestURL()
         {
             // 轮流返回请求地址
-            _requestCount++;
-            if (_requestCount % 2 == 0)
-                return Param.FallbackURL;
-            else
+           // _requestCount++;
+          //  if (_requestCount % 2 == 0)
+           //     return Param.FallbackURL;
+           // else
                 return Param.MainURL;
         }
 

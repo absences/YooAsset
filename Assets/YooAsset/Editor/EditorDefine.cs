@@ -11,9 +11,9 @@ namespace YooAsset.Editor
         public static readonly Type[] DockedWindowTypes =
         {
             typeof(AssetBundleBuilderWindow),
-            typeof(AssetBundleCollectorWindow),
+            //typeof(AssetBundleCollectorWindow),
             typeof(AssetBundleDebuggerWindow),
-            typeof(AssetBundleReporterWindow)
+            //typeof(AssetBundleReporterWindow)
         };
 #endif
     }

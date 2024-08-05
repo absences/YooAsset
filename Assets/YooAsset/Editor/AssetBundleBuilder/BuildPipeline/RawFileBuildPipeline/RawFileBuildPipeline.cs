@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Linq;
-using UnityEditor;
+﻿using System.Collections.Generic;
 
 namespace YooAsset.Editor
 {
@@ -11,15 +6,11 @@ namespace YooAsset.Editor
     {
         public BuildResult Run(BuildParameters buildParameters, bool enableLog)
         {
-            if (buildParameters is RawFileBuildParameters)
-            {
-                AssetBundleBuilder builder = new AssetBundleBuilder();
+            AssetBundleBuilder builder = new AssetBundleBuilder();
+            var rawParam = buildParameters as RawFileBuildParameters;
+            if (rawParam.CopyGameAssetsFrom == "from_client_game_assets")
                 return builder.Run(buildParameters, GetDefaultBuildPipeline(), enableLog);
-            }
-            else
-            {
-                throw new Exception($"Invalid build parameter type : {buildParameters.GetType().Name}");
-            }
+            return builder.Run(buildParameters, GetPatchBuildPipeline(), enableLog);
         }
 
         /// <summary>
@@ -35,11 +26,27 @@ namespace YooAsset.Editor
                     new TaskEncryption_RFBP(),
                     new TaskUpdateBundleInfo_RFBP(),
                     new TaskCreateManifest_RFBP(),
-                    new TaskCreateReport_RFBP(),
                     new TaskCreatePackage_RFBP(),
-                    new TaskCopyBuildinFiles_RFBP(),
+                    new TaskCopyResult_RFBP(),
                 };
             return pipeline;
         }
+
+        private List<IBuildTask> GetPatchBuildPipeline()
+        {
+            List<IBuildTask> pipeline = new List<IBuildTask>
+                {
+                    new TaskPrepare_RFBP(),
+                    new TaskGetBuildMap_RFBP(),
+                    new TaskBuilding_RFBP(),
+                    new TaskEncryption_RFBP(),
+                    new TaskUpdateBundleInfo_RFBP(),
+                    new TaskCreateManifest_RFBP(),
+                   // new TaskCreatePackage_RFBP(),
+                    new TaskBuildPatch_RFBP()
+                };
+            return pipeline;
+        }
+
     }
 }

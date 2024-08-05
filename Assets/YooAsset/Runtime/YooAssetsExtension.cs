@@ -161,10 +161,10 @@ namespace YooAsset
         /// </summary>
         /// <param name="location">场景的定位地址</param>
         /// <param name="sceneMode">场景加载模式</param>
-        public static SceneHandle LoadSceneSync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None)
+        public static SceneHandle LoadSceneSync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single)
         {
             DebugCheckDefaultPackageValid();
-            return _defaultPackage.LoadSceneSync(location, sceneMode, physicsMode);
+            return _defaultPackage.LoadSceneSync(location, sceneMode);
         }
 
         /// <summary>
@@ -172,10 +172,10 @@ namespace YooAsset
         /// </summary>
         /// <param name="assetInfo">场景的资源信息</param>
         /// <param name="sceneMode">场景加载模式</param>
-        public static SceneHandle LoadSceneSync(AssetInfo assetInfo, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None)
+        public static SceneHandle LoadSceneSync(AssetInfo assetInfo, LoadSceneMode sceneMode = LoadSceneMode.Single)
         {
             DebugCheckDefaultPackageValid();
-            return _defaultPackage.LoadSceneSync(assetInfo, sceneMode, physicsMode);
+            return _defaultPackage.LoadSceneSync(assetInfo, sceneMode);
         }
 
         /// <summary>
@@ -185,10 +185,10 @@ namespace YooAsset
         /// <param name="sceneMode">场景加载模式</param>
         /// <param name="suspendLoad">场景加载到90%自动挂起</param>
         /// <param name="priority">优先级</param>
-        public static SceneHandle LoadSceneAsync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None, bool suspendLoad = false, uint priority = 100)
+        public static SceneHandle LoadSceneAsync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single, bool suspendLoad = false, uint priority = 100)
         {
             DebugCheckDefaultPackageValid();
-            return _defaultPackage.LoadSceneAsync(location, sceneMode, physicsMode, suspendLoad, priority);
+            return _defaultPackage.LoadSceneAsync(location, sceneMode, suspendLoad, priority);
         }
 
         /// <summary>
@@ -198,10 +198,10 @@ namespace YooAsset
         /// <param name="sceneMode">场景加载模式</param>
         /// <param name="suspendLoad">场景加载到90%自动挂起</param>
         /// <param name="priority">优先级</param>
-        public static SceneHandle LoadSceneAsync(AssetInfo assetInfo, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None, bool suspendLoad = false, uint priority = 100)
+        public static SceneHandle LoadSceneAsync(AssetInfo assetInfo, LoadSceneMode sceneMode = LoadSceneMode.Single, bool suspendLoad = false, uint priority = 100)
         {
             DebugCheckDefaultPackageValid();
-            return _defaultPackage.LoadSceneAsync(assetInfo, sceneMode, physicsMode, suspendLoad, priority);
+            return _defaultPackage.LoadSceneAsync(assetInfo, sceneMode, suspendLoad, priority);
         }
         #endregion
 
@@ -484,10 +484,10 @@ namespace YooAsset
         /// <param name="tag">资源标签</param>
         /// <param name="downloadingMaxNumber">同时下载的最大文件数</param>
         /// <param name="failedTryAgain">下载失败的重试次数</param>
-        public static ResourceDownloaderOperation CreateResourceDownloader(string tag, int downloadingMaxNumber, int failedTryAgain)
+        public static ResourceDownloaderOperation CreateResourceDownloader(string tag, bool includeTags, int downloadingMaxNumber, int failedTryAgain)
         {
             DebugCheckDefaultPackageValid();
-            return _defaultPackage.CreateResourceDownloader(new string[] { tag }, downloadingMaxNumber, failedTryAgain);
+            return _defaultPackage.CreateResourceDownloader(new string[] { tag }, includeTags, downloadingMaxNumber, failedTryAgain);
         }
 
         /// <summary>
@@ -496,10 +496,10 @@ namespace YooAsset
         /// <param name="tags">资源标签列表</param>
         /// <param name="downloadingMaxNumber">同时下载的最大文件数</param>
         /// <param name="failedTryAgain">下载失败的重试次数</param>
-        public static ResourceDownloaderOperation CreateResourceDownloader(string[] tags, int downloadingMaxNumber, int failedTryAgain)
+        public static ResourceDownloaderOperation CreateResourceDownloader(string[] tags, bool includeTags, int downloadingMaxNumber, int failedTryAgain)
         {
             DebugCheckDefaultPackageValid();
-            return _defaultPackage.CreateResourceDownloader(tags, downloadingMaxNumber, failedTryAgain);
+            return _defaultPackage.CreateResourceDownloader(tags, includeTags, downloadingMaxNumber, failedTryAgain);
         }
 
         /// <summary>

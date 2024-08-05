@@ -18,7 +18,7 @@ namespace YooAsset.Editor
             int outputNameStyle = (int)buildParametersContext.Parameters.FileNameStyle;
 
             // 1.检测文件名长度
-            foreach (var bundleInfo in buildMapContext.Collection)
+            foreach (var bundleInfo in buildMapContext.Collection.Values)
             {
                 // NOTE：检测文件名长度不要超过260字符。
                 string fileName = bundleInfo.BundleName;
@@ -30,7 +30,7 @@ namespace YooAsset.Editor
             }
 
             // 2.更新构建输出的文件路径
-            foreach (var bundleInfo in buildMapContext.Collection)
+            foreach (var bundleInfo in buildMapContext.Collection.Values)
             {
                 bundleInfo.BuildOutputFilePath = $"{pipelineOutputDirectory}/{bundleInfo.BundleName}";
                 if (bundleInfo.Encrypted)
@@ -40,7 +40,7 @@ namespace YooAsset.Editor
             }
 
             // 3.更新文件其它信息
-            foreach (var bundleInfo in buildMapContext.Collection)
+            foreach (var bundleInfo in buildMapContext.Collection.Values)
             {
                 bundleInfo.PackageUnityHash = GetUnityHash(bundleInfo, context);
                 bundleInfo.PackageUnityCRC = GetUnityCRC(bundleInfo, context);
@@ -50,7 +50,7 @@ namespace YooAsset.Editor
             }
 
             // 4.更新补丁包输出的文件路径
-            foreach (var bundleInfo in buildMapContext.Collection)
+            foreach (var bundleInfo in buildMapContext.Collection.Values)
             {
                 string bundleName = bundleInfo.BundleName;
                 string fileHash = bundleInfo.PackageFileHash;

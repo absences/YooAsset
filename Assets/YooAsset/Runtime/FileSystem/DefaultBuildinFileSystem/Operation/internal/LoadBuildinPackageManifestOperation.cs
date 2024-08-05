@@ -45,6 +45,7 @@ namespace YooAsset
                 if (_webDataRequestOp == null)
                 {
                     string filePath = _fileSystem.GetBuildinPackageManifestFilePath(_packageVersion);
+
                     string url = DownloadSystemHelper.ConvertToWWWPath(filePath);
                     _webDataRequestOp = new UnityWebDataRequestOperation(url);
                     OperationSystem.StartOperation(_fileSystem.PackageName, _webDataRequestOp);

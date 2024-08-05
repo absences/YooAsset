@@ -10,10 +10,10 @@ namespace YooAsset.Editor
         private bool _isAddAssetTags = false;
         private readonly HashSet<string> _referenceBundleNames = new HashSet<string>();
 
-        /// <summary>
-        /// 收集器类型
-        /// </summary>
-        public ECollectorType CollectorType { private set; get; }
+        ///// <summary>
+        ///// 收集器类型
+        ///// </summary>
+        //public ECollectorType CollectorType { private set; get; }
 
         /// <summary>
         /// 资源包完整名称
@@ -42,18 +42,18 @@ namespace YooAsset.Editor
         public List<BuildAssetInfo> AllDependAssetInfos { private set; get; }
 
 
-        public BuildAssetInfo(ECollectorType collectorType, string bundleName, string address, AssetInfo assetInfo)
+        //public BuildAssetInfo(ECollectorType collectorType, string bundleName, string address, AssetInfo assetInfo)
+        //{
+        //    CollectorType = collectorType;
+        //    BundleName = bundleName;
+        //    Address = address;
+        //    AssetInfo = assetInfo;
+        //}
+        public BuildAssetInfo(AssetInfo assetInfo, string bundleName)
         {
-            CollectorType = collectorType;
+            //CollectorType = ECollectorType.None;
             BundleName = bundleName;
-            Address = address;
-            AssetInfo = assetInfo;
-        }
-        public BuildAssetInfo(AssetInfo assetInfo)
-        {
-            CollectorType = ECollectorType.None;
-            BundleName = string.Empty;
-            Address = string.Empty;
+            //Address = string.Empty;
             AssetInfo = assetInfo;
         }
 

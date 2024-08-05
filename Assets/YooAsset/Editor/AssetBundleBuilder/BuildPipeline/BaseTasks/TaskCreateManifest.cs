@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace YooAsset.Editor
 {
@@ -9,10 +8,9 @@ namespace YooAsset.Editor
     {
         internal PackageManifest Manifest;
     }
-
     public abstract class TaskCreateManifest
     {
-        private readonly Dictionary<string, int> _cachedBundleID = new Dictionary<string, int>(10000);
+        protected readonly Dictionary<string, int> _cachedBundleID = new Dictionary<string, int>(10000);
         private readonly Dictionary<int, HashSet<string>> _cacheBundleTags = new Dictionary<int, HashSet<string>>(10000);
 
         /// <summary>
@@ -28,9 +26,9 @@ namespace YooAsset.Editor
             // 创建新补丁清单
             PackageManifest manifest = new PackageManifest();
             manifest.FileVersion = YooAssetSettings.ManifestFileVersion;
-            manifest.EnableAddressable = buildMapContext.Command.EnableAddressable;
-            manifest.LocationToLower = buildMapContext.Command.LocationToLower;
-            manifest.IncludeAssetGUID = buildMapContext.Command.IncludeAssetGUID;
+            //manifest.EnableAddressable = buildMapContext.Command.EnableAddressable;
+            //manifest.LocationToLower = buildMapContext.Command.LocationToLower;
+            manifest.IncludeAssetGUID = false;
             manifest.OutputNameStyle = (int)buildParameters.FileNameStyle;
             manifest.BuildPipeline = buildParameters.BuildPipeline;
             manifest.PackageName = buildParameters.PackageName;
@@ -38,14 +36,14 @@ namespace YooAsset.Editor
             manifest.BundleList = GetAllPackageBundle(buildMapContext);
             manifest.AssetList = GetAllPackageAsset(buildMapContext);
 
-            if (buildParameters.BuildMode != EBuildMode.SimulateBuild)
-            {
-                // 处理资源包的依赖列表
-                ProcessBundleDepends(context, manifest);
+            //补丁处理
+            AddPatchList(manifest);
+            // 处理资源包的依赖列表
+            ProcessBundleDepends(context, manifest);
 
-                // 处理资源包的标签集合
-                ProcessBundleTags(manifest);
-            }
+            // 处理资源包的标签集合
+            ProcessBundleTags(manifest);
+
 
             // 创建补丁清单文本文件
             {
@@ -92,21 +90,26 @@ namespace YooAsset.Editor
         /// </summary>
         protected abstract string[] GetBundleDepends(BuildContext context, string bundleName);
 
+        internal virtual void AddPatchList(PackageManifest manifest)
+        {
+
+        }
         /// <summary>
         /// 获取主资源对象列表
         /// </summary>
-        private List<PackageAsset> GetAllPackageAsset(BuildMapContext buildMapContext)
+        internal List<PackageAsset> GetAllPackageAsset(BuildMapContext buildMapContext)
         {
             List<PackageAsset> result = new List<PackageAsset>(1000);
-            foreach (var bundleInfo in buildMapContext.Collection)
+            foreach (BuildBundleInfo bundleInfo in buildMapContext.Collection.Values)
             {
                 var assetInfos = bundleInfo.GetAllManifestAssetInfos();
                 foreach (var assetInfo in assetInfos)
                 {
                     PackageAsset packageAsset = new PackageAsset();
-                    packageAsset.Address = buildMapContext.Command.EnableAddressable ? assetInfo.Address : string.Empty;
+                    //packageAsset.Address = buildMapContext.Command.EnableAddressable ? assetInfo.Address : string.Empty;
                     packageAsset.AssetPath = assetInfo.AssetInfo.AssetPath;
-                    packageAsset.AssetGUID = buildMapContext.Command.IncludeAssetGUID ? assetInfo.AssetInfo.AssetGUID : string.Empty;
+                    packageAsset.AssetGUID = assetInfo.AssetInfo.AssetGUID;
+                    //packageAsset.AssetName = assetInfo.AssetInfo.AssetName;
                     packageAsset.AssetTags = assetInfo.AssetTags.ToArray();
                     packageAsset.BundleID = GetCachedBundleID(assetInfo.BundleName);
                     result.Add(packageAsset);
@@ -118,10 +121,10 @@ namespace YooAsset.Editor
         /// <summary>
         /// 获取资源包列表
         /// </summary>
-        private List<PackageBundle> GetAllPackageBundle(BuildMapContext buildMapContext)
+        internal List<PackageBundle> GetAllPackageBundle(BuildMapContext buildMapContext)
         {
             List<PackageBundle> result = new List<PackageBundle>(1000);
-            foreach (var bundleInfo in buildMapContext.Collection)
+            foreach (var bundleInfo in buildMapContext.Collection.Values)
             {
                 var packageBundle = bundleInfo.CreatePackageBundle();
                 result.Add(packageBundle);
@@ -180,9 +183,9 @@ namespace YooAsset.Editor
             for (int index = 0; index < manifest.BundleList.Count; index++)
             {
                 var packageBundle = manifest.BundleList[index];
-                if (_cacheBundleTags.TryGetValue(index, out var value))
+                if (_cacheBundleTags.ContainsKey(index))
                 {
-                    packageBundle.Tags = value.ToArray();
+                    packageBundle.Tags = _cacheBundleTags[index].ToArray();
                 }
                 else
                 {

@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace YooAsset
 {
     /// <summary>
@@ -6,6 +8,7 @@ namespace YooAsset
     /// </summary>
     public abstract class UpdatePackageManifestOperation : AsyncOperationBase
     {
+        public string PackageVersion;
     }
     internal sealed class UpdatePackageManifestImplOperation : UpdatePackageManifestOperation
     {
@@ -58,14 +61,23 @@ namespace YooAsset
 
             if (_steps == ESteps.CheckActiveManifest)
             {
+                int serverVersion = int.Parse(_packageVersion);
+
+                var activeVersion = 0;
+                if (_impl.ActiveManifest != null)
+                {
+                    activeVersion = int.Parse(_impl.ActiveManifest.PackageVersion);
+                }
                 // 检测当前激活的清单对象	
-                if (_impl.ActiveManifest != null && _impl.ActiveManifest.PackageVersion == _packageVersion)
+                if (_impl.ActiveManifest != null && activeVersion >= serverVersion)
                 {
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Succeed;
+                    PackageVersion = _impl.ActiveManifest.PackageVersion;
                 }
                 else
                 {
+                    PackageVersion = _packageVersion;
                     _steps = ESteps.LoadPackageManifest;
                 }
             }

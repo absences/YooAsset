@@ -55,43 +55,6 @@ namespace YooAsset
         public abstract ResourceDownloaderOperation CreateBundleDownloader(string[] locations, int downloadingMaxNumber, int failedTryAgain, int timeout = 60);
     }
 
-    internal class EditorSimulateModePreDownloadContentOperation : PreDownloadContentOperation
-    {
-        private readonly EditorSimulateModeImpl _impl;
-
-        public EditorSimulateModePreDownloadContentOperation(EditorSimulateModeImpl impl)
-        {
-            _impl = impl;
-        }
-        internal override void InternalOnStart()
-        {
-            Status = EOperationStatus.Succeed;
-        }
-        internal override void InternalOnUpdate()
-        {
-        }
-
-        public override ResourceDownloaderOperation CreateResourceDownloader(int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
-        {
-            return ResourceDownloaderOperation.CreateEmptyDownloader(_impl.PackageName, downloadingMaxNumber, failedTryAgain, timeout);
-        }
-        public override ResourceDownloaderOperation CreateResourceDownloader(string tag, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
-        {
-            return ResourceDownloaderOperation.CreateEmptyDownloader(_impl.PackageName, downloadingMaxNumber, failedTryAgain, timeout);
-        }
-        public override ResourceDownloaderOperation CreateResourceDownloader(string[] tags, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
-        {
-            return ResourceDownloaderOperation.CreateEmptyDownloader(_impl.PackageName, downloadingMaxNumber, failedTryAgain, timeout);
-        }
-        public override ResourceDownloaderOperation CreateBundleDownloader(string location, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
-        {
-            return ResourceDownloaderOperation.CreateEmptyDownloader(_impl.PackageName, downloadingMaxNumber, failedTryAgain, timeout);
-        }
-        public override ResourceDownloaderOperation CreateBundleDownloader(string[] locations, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
-        {
-            return ResourceDownloaderOperation.CreateEmptyDownloader(_impl.PackageName, downloadingMaxNumber, failedTryAgain, timeout);
-        }
-    }
     internal class OfflinePlayModePreDownloadContentOperation : PreDownloadContentOperation
     {
         private readonly OfflinePlayModeImpl _impl;
@@ -237,7 +200,7 @@ namespace YooAsset
                 return ResourceDownloaderOperation.CreateEmptyDownloader(_impl.PackageName, downloadingMaxNumber, failedTryAgain, timeout);
             }
 
-            List<BundleInfo> downloadList = PlayModeHelper.GetDownloadListByTags(_manifest, new string[] { tag }, _impl.BuildinFileSystem, _impl.DeliveryFileSystem, _impl.CacheFileSystem);
+            List<BundleInfo> downloadList = PlayModeHelper.GetDownloadListByTags(_manifest, new string[] { tag }, false, _impl.BuildinFileSystem, _impl.DeliveryFileSystem, _impl.CacheFileSystem);
             var operation = new ResourceDownloaderOperation(_impl.PackageName, downloadList, downloadingMaxNumber, failedTryAgain, timeout);
             return operation;
         }
@@ -249,7 +212,7 @@ namespace YooAsset
                 return ResourceDownloaderOperation.CreateEmptyDownloader(_impl.PackageName, downloadingMaxNumber, failedTryAgain, timeout);
             }
 
-            List<BundleInfo> downloadList = PlayModeHelper.GetDownloadListByTags(_manifest, tags, _impl.BuildinFileSystem, _impl.DeliveryFileSystem, _impl.CacheFileSystem);
+            List<BundleInfo> downloadList = PlayModeHelper.GetDownloadListByTags(_manifest, tags, false, _impl.BuildinFileSystem, _impl.DeliveryFileSystem, _impl.CacheFileSystem);
             var operation = new ResourceDownloaderOperation(_impl.PackageName, downloadList, downloadingMaxNumber, failedTryAgain, timeout);
             return operation;
         }

@@ -69,6 +69,10 @@ namespace YooAsset.Editor
         public string BundleName { private set; get; }
 
         /// <summary>
+        /// 资源包路径
+        /// </summary>
+        public string BundlePath { set; get; }
+        /// <summary>
         /// 加密文件
         /// </summary>
         public bool Encrypted { set; get; }
@@ -138,24 +142,11 @@ namespace YooAsset.Editor
         }
 
         /// <summary>
-        /// 创建AssetBundleBuild类
-        /// </summary>
-        public UnityEditor.AssetBundleBuild CreatePipelineBuild()
-        {
-            // 注意：我们不再支持AssetBundle的变种机制
-            AssetBundleBuild build = new AssetBundleBuild();
-            build.assetBundleName = BundleName;
-            build.assetBundleVariant = string.Empty;
-            build.assetNames = GetAllMainAssetPaths();
-            return build;
-        }
-
-        /// <summary>
         /// 获取所有写入补丁清单的资源
         /// </summary>
         public BuildAssetInfo[] GetAllManifestAssetInfos()
         {
-            return MainAssets.Where(t => t.CollectorType == ECollectorType.MainAssetCollector).ToArray();
+            return MainAssets.ToArray();
         }
 
         /// <summary>

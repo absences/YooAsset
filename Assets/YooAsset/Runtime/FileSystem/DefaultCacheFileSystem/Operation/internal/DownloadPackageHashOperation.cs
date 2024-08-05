@@ -16,7 +16,7 @@ namespace YooAsset
         private readonly string _packageVersion;
         private readonly int _timeout;
         private UnityWebFileRequestOperation _webFileRequestOp;
-        private int _requestCount = 0;
+       // private int _requestCount = 0;
         private ESteps _steps = ESteps.None;
 
 
@@ -28,7 +28,7 @@ namespace YooAsset
         }
         internal override void InternalOnStart()
         {
-            _requestCount = WebRequestCounter.GetRequestFailedCount(_fileSystem.PackageName, nameof(DownloadPackageHashOperation));
+           // _requestCount = WebRequestCounter.GetRequestFailedCount(_fileSystem.PackageName, nameof(DownloadPackageHashOperation));
             _steps = ESteps.CheckExist;
         }
         internal override void InternalOnUpdate()
@@ -56,7 +56,7 @@ namespace YooAsset
                 {
                     string savePath = _fileSystem.GetCachePackageHashFilePath(_packageVersion);
                     string fileName = YooAssetSettingsData.GetPackageHashFileName(_fileSystem.PackageName, _packageVersion);
-                    string webURL = GetWebRequestURL(fileName);
+                    string webURL = GetWebRequestURL(_fileSystem.PackageName, fileName);
                     _webFileRequestOp = new UnityWebFileRequestOperation(webURL, savePath, _timeout);
                     OperationSystem.StartOperation(_fileSystem.PackageName, _webFileRequestOp);
                 }
@@ -79,13 +79,13 @@ namespace YooAsset
             }
         }
 
-        private string GetWebRequestURL(string fileName)
+        private string GetWebRequestURL(string package, string fileName)
         {
             // 轮流返回请求地址
-            if (_requestCount % 2 == 0)
-                return _fileSystem.RemoteServices.GetRemoteMainURL(fileName);
-            else
-                return _fileSystem.RemoteServices.GetRemoteFallbackURL(fileName);
+            // if (_requestCount % 2 == 0)
+            return _fileSystem.RemoteServices.GetRemoteMainURL(package, fileName);
+           // else
+              //  return _fileSystem.RemoteServices.GetRemoteFallbackURL(fileName);
         }
     }
 }

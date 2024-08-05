@@ -52,12 +52,12 @@ namespace YooAsset.Editor
             return Parameters.GetPackageRootDirectory();
         }
 
-        /// <summary>
-        /// 获取内置资源的根目录
-        /// </summary>
-        public string GetBuildinRootDirectory()
-        {
-            return Parameters.GetBuildinRootDirectory();
-        }
+        ///// <summary>
+        ///// 获取内置资源的根目录
+        ///// </summary>
+        //public string GetBuildinRootDirectory()
+        //{
+        //    return Parameters.GetBuildinRootDirectory();
+        //}
     }
 }

@@ -7,7 +7,7 @@ namespace YooAsset
     /// <summary>
     /// 内置资源清单目录
     /// </summary>
-    internal class DefaultBuildinFileCatalog : ScriptableObject
+    public class DefaultBuildinFileCatalog : ScriptableObject
     {
         [Serializable]
         public class FileWrapper

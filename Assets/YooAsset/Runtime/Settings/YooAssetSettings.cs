@@ -3,17 +3,14 @@
 namespace YooAsset
 {
     [CreateAssetMenu(fileName = "YooAssetSettings", menuName = "YooAsset/Create YooAsset Settings")]
-    internal class YooAssetSettings : ScriptableObject
+    public class YooAssetSettings : ScriptableObject
     {
+        public string artName = "assets";
+        public string clientName = "rawfiles";
         /// <summary>
         /// 清单文件名称
         /// </summary>
         public string ManifestFileName = "PackageManifest";
-
-        /// <summary>
-        /// 默认的YooAsset文件夹名称
-        /// </summary>
-        public string DefaultYooFolderName = "yoo";
 
 
         /// <summary>

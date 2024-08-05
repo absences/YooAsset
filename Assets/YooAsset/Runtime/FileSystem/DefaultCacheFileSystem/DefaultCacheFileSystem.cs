@@ -151,14 +151,14 @@ namespace YooAsset
             {
                 if (string.IsNullOrEmpty(param.ImportFilePath))
                 {
-                    param.MainURL = RemoteServices.GetRemoteMainURL(bundle.FileName);
-                    param.FallbackURL = RemoteServices.GetRemoteFallbackURL(bundle.FileName);
+                    param.MainURL = RemoteServices.GetRemoteMainURL(bundle.PackageName, bundle.FileName);
+                    // param.FallbackURL = RemoteServices.GetRemoteFallbackURL(bundle.FileName);
                 }
                 else
                 {
                     // 注意：把本地文件路径指定为远端下载地址
                     param.MainURL = DownloadSystemHelper.ConvertToWWWPath(param.ImportFilePath);
-                    param.FallbackURL = param.MainURL;
+                    // param.FallbackURL = param.MainURL;
                 }
 
                 if (bundle.FileSize >= ResumeDownloadMinimumSize)
@@ -399,11 +399,11 @@ namespace YooAsset
             // 注意：为了方便调试查看，编辑器下把存储目录放到项目里。
             string projectPath = Path.GetDirectoryName(UnityEngine.Application.dataPath);
             projectPath = PathUtility.RegularPath(projectPath);
-            return PathUtility.Combine(projectPath, YooAssetSettingsData.Setting.DefaultYooFolderName);
+            return PathUtility.Combine(projectPath, "Documents");
 #elif UNITY_STANDALONE
-            return PathUtility.Combine(UnityEngine.Application.dataPath, YooAssetSettingsData.Setting.DefaultYooFolderName);
+            return PathUtility.Combine(UnityEngine.Application.dataPath,"Documents");
 #else
-            return PathUtility.Combine(UnityEngine.Application.persistentDataPath, YooAssetSettingsData.Setting.DefaultYooFolderName);	
+            return PathUtility.Combine(UnityEngine.Application.persistentDataPath, "Documents");	
 #endif
         }
         protected string GetDataFilePath(PackageBundle bundle)

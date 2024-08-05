@@ -10,7 +10,7 @@ namespace YooAsset.Editor
             var buildParameters = context.GetContextObject<BuildParametersContext>();
             var buildMapContext = context.GetContextObject<BuildMapContext>();
             var buildMode = buildParameters.Parameters.BuildMode;
-            if (buildMode != EBuildMode.SimulateBuild)
+            //if (buildMode != EBuildMode.SimulateBuild)
             {
                 CreatePackageCatalog(buildParameters, buildMapContext);
             }
@@ -27,7 +27,7 @@ namespace YooAsset.Editor
             // 拷贝所有补丁文件
             int progressValue = 0;
             int fileTotalCount = buildMapContext.Collection.Count;
-            foreach (var bundleInfo in buildMapContext.Collection)
+            foreach (var bundleInfo in buildMapContext.Collection.Values)
             {
                 EditorTools.CopyFile(bundleInfo.PackageSourceFilePath, bundleInfo.PackageDestFilePath, true);
                 EditorTools.DisplayProgressBar("Copy patch file", ++progressValue, fileTotalCount);

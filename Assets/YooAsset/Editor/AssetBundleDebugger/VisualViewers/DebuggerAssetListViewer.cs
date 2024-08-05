@@ -187,7 +187,7 @@ namespace YooAsset.Editor
                 label.style.unityTextAlign = TextAnchor.MiddleLeft;
                 label.style.marginLeft = 3f;
                 //label.style.flexGrow = 1f;
-                label.style.width = 120;
+                label.style.width = 110;
                 element.Add(label);
             }
 

@@ -1,4 +1,7 @@
 ﻿
+using System;
+using System.Text;
+
 namespace YooAsset
 {
     /// <summary>

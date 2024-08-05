@@ -72,9 +72,9 @@ namespace YooAsset
             var operation = new ResourceDownloaderOperation(PackageName, downloadList, downloadingMaxNumber, failedTryAgain, timeout);
             return operation;
         }
-        ResourceDownloaderOperation IPlayMode.CreateResourceDownloaderByTags(string[] tags, int downloadingMaxNumber, int failedTryAgain, int timeout)
+        ResourceDownloaderOperation IPlayMode.CreateResourceDownloaderByTags(string[] tags, bool includeTags, int downloadingMaxNumber, int failedTryAgain, int timeout)
         {
-            List<BundleInfo> downloadList = PlayModeHelper.GetDownloadListByTags(ActiveManifest, tags, BuildinFileSystem);
+            List<BundleInfo> downloadList = PlayModeHelper.GetDownloadListByTags(ActiveManifest, tags, includeTags, BuildinFileSystem);
             var operation = new ResourceDownloaderOperation(PackageName, downloadList, downloadingMaxNumber, failedTryAgain, timeout);
             return operation;
         }
@@ -105,7 +105,7 @@ namespace YooAsset
         #endregion
 
         #region IBundleQuery接口
-        private BundleInfo CreateBundleInfo(PackageBundle packageBundle, AssetInfo assetInfo)
+        private BundleInfo CreateBundleInfo(PackageBundle packageBundle)
         {
             if (packageBundle == null)
                 throw new Exception("Should never get here !");
@@ -123,9 +123,11 @@ namespace YooAsset
             if (assetInfo.IsInvalid)
                 throw new Exception("Should never get here !");
 
-            // 注意：如果清单里未找到资源包会抛出异常！
+ 			if (assetInfo.PackageBundle != null)
+                return CreateBundleInfo(assetInfo.PackageBundle);            
+			// 注意：如果清单里未找到资源包会抛出异常！
             var packageBundle = ActiveManifest.GetMainPackageBundle(assetInfo.AssetPath);
-            return CreateBundleInfo(packageBundle, assetInfo);
+            return CreateBundleInfo(packageBundle);
         }
         BundleInfo[] IBundleQuery.GetDependBundleInfos(AssetInfo assetInfo)
         {
@@ -133,11 +135,11 @@ namespace YooAsset
                 throw new Exception("Should never get here !");
 
             // 注意：如果清单里未找到资源包会抛出异常！
-            var depends = ActiveManifest.GetAllDependencies(assetInfo.AssetPath);
+            var depends = ActiveManifest.GetAllDependencies(assetInfo);
             List<BundleInfo> result = new List<BundleInfo>(depends.Length);
             foreach (var packageBundle in depends)
             {
-                BundleInfo bundleInfo = CreateBundleInfo(packageBundle, assetInfo);
+                BundleInfo bundleInfo = CreateBundleInfo(packageBundle);
                 result.Add(bundleInfo);
             }
             return result.ToArray();
@@ -157,7 +159,7 @@ namespace YooAsset
                 throw new Exception("Should never get here !");
 
             // 注意：如果清单里未找到资源包会抛出异常！
-            var depends = ActiveManifest.GetAllDependencies(assetInfo.AssetPath);
+            var depends = ActiveManifest.GetAllDependencies(assetInfo);
             List<string> result = new List<string>(depends.Length);
             foreach (var packageBundle in depends)
             {

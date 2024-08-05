@@ -9,81 +9,6 @@ namespace YooAsset
     }
 
     /// <summary>
-    /// 编辑器下模拟模式
-    /// </summary>
-    internal sealed class EditorSimulateModeInitializationOperation : InitializationOperation
-    {
-        private enum ESteps
-        {
-            None,
-            CreateFileSystem,
-            InitFileSystem,
-            Done,
-        }
-
-        private readonly EditorSimulateModeImpl _impl;
-        private readonly EditorSimulateModeParameters _parameters;
-        private FSInitializeFileSystemOperation _initFileSystemOp;
-        private ESteps _steps = ESteps.None;
-
-        internal EditorSimulateModeInitializationOperation(EditorSimulateModeImpl impl, EditorSimulateModeParameters parameters)
-        {
-            _impl = impl;
-            _parameters = parameters;
-        }
-        internal override void InternalOnStart()
-        {
-            _steps = ESteps.CreateFileSystem;
-        }
-        internal override void InternalOnUpdate()
-        {
-            if (_steps == ESteps.CreateFileSystem)
-            {
-                if (_parameters.EditorFileSystemParameters == null)
-                {
-                    _steps = ESteps.Done;
-                    Status = EOperationStatus.Failed;
-                    Error = "Editor file system parameters is null";
-                    return;
-                }
-
-                _impl.EditorFileSystem = PlayModeHelper.CreateFileSystem(_impl.PackageName, _parameters.EditorFileSystemParameters);
-                if (_impl.EditorFileSystem == null)
-                {
-                    _steps = ESteps.Done;
-                    Status = EOperationStatus.Failed;
-                    Error = "Failed to create editor file system";
-                    return;
-                }
-
-                _steps = ESteps.InitFileSystem;
-            }
-
-            if (_steps == ESteps.InitFileSystem)
-            {
-                if (_initFileSystemOp == null)
-                    _initFileSystemOp = _impl.EditorFileSystem.InitializeFileSystemAsync();
-
-                Progress = _initFileSystemOp.Progress;
-                if (_initFileSystemOp.IsDone == false)
-                    return;
-
-                if (_initFileSystemOp.Status == EOperationStatus.Succeed)
-                {
-                    _steps = ESteps.Done;
-                    Status = EOperationStatus.Succeed;
-                }
-                else
-                {
-                    _steps = ESteps.Done;
-                    Status = EOperationStatus.Failed;
-                    Error = _initFileSystemOp.Error;
-                }
-            }
-        }
-    }
-
-    /// <summary>
     /// 离线运行模式
     /// </summary>
     internal sealed class OfflinePlayModeInitializationOperation : InitializationOperation
@@ -93,13 +18,13 @@ namespace YooAsset
             None,
             CreateFileSystem,
             InitFileSystem,
+            LoadManifestFile,
             Done,
         }
 
         private readonly OfflinePlayModeImpl _impl;
         private readonly OfflinePlayModeParameters _parameters;
         private FSInitializeFileSystemOperation _initFileSystemOp;
-        private FSRequestPackageVersionOperation _requestPackageVersionOp;
         private FSLoadPackageManifestOperation _loadPackageManifestOp;
         private ESteps _steps = ESteps.None;
 
@@ -150,14 +75,36 @@ namespace YooAsset
 
                 if (_initFileSystemOp.Status == EOperationStatus.Succeed)
                 {
-                    _steps = ESteps.Done;
-                    Status = EOperationStatus.Succeed;
+                    _steps = ESteps.LoadManifestFile;
                 }
                 else
                 {
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
                     Error = _initFileSystemOp.Error;
+                }
+            }
+
+            if (_steps == ESteps.LoadManifestFile)
+            {
+                if (_loadPackageManifestOp == null)
+                    _loadPackageManifestOp = _impl.BuildinFileSystem.LoadPackageManifestAsync(null, int.MaxValue);
+
+                Progress = _loadPackageManifestOp.Progress;
+                if (_loadPackageManifestOp.IsDone == false)
+                    return;
+
+                if (_loadPackageManifestOp.Status == EOperationStatus.Succeed)
+                {
+                    _steps = ESteps.Done;
+                    _impl.ActiveManifest = _loadPackageManifestOp.Manifest;
+                    Status = EOperationStatus.Succeed;
+                }
+                else
+                {
+                    _steps = ESteps.Done;
+                    Status = EOperationStatus.Failed;
+                    Error = _loadPackageManifestOp.Error;
                 }
             }
         }
@@ -174,6 +121,7 @@ namespace YooAsset
             CreateFileSystem,
             InitBuildinFileSystem,
             InitDeliveryFileSystem,
+            LoadManifestFile,
             InitCacheFileSystem,
             Done,
         }
@@ -181,6 +129,8 @@ namespace YooAsset
         private readonly HostPlayModeImpl _impl;
         private readonly HostPlayModeParameters _parameters;
         private FSInitializeFileSystemOperation _initBuildinFileSystemOp;
+        private FSLoadPackageManifestOperation _loadPackageManifestOp;
+
         private FSInitializeFileSystemOperation _initDeliveryFileSystemOp;
         private FSInitializeFileSystemOperation _initCacheFileSystemOp;
         private ESteps _steps = ESteps.None;
@@ -237,7 +187,7 @@ namespace YooAsset
                     Error = "Failed to create buildin file system";
                     return;
                 }
-
+                
                 _impl.CacheFileSystem = PlayModeHelper.CreateFileSystem(_impl.PackageName, _parameters.CacheFileSystemParameters);
                 if (_impl.CacheFileSystem == null)
                 {
@@ -261,13 +211,34 @@ namespace YooAsset
 
                 if (_initBuildinFileSystemOp.Status == EOperationStatus.Succeed)
                 {
-                    _steps = ESteps.InitDeliveryFileSystem;
+                    _steps = ESteps.LoadManifestFile;
                 }
                 else
                 {
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
                     Error = _initBuildinFileSystemOp.Error;
+                }
+            }
+            if (_steps == ESteps.LoadManifestFile)
+            {
+                if (_loadPackageManifestOp == null)
+                    _loadPackageManifestOp = _impl.BuildinFileSystem.LoadPackageManifestAsync(null, int.MaxValue);
+
+                Progress = _loadPackageManifestOp.Progress;
+                if (_loadPackageManifestOp.IsDone == false)
+                    return;
+
+                if (_loadPackageManifestOp.Status == EOperationStatus.Succeed)
+                {
+                    _steps = ESteps.InitDeliveryFileSystem;
+                    _impl.ActiveManifest = _loadPackageManifestOp.Manifest;
+                }
+                else
+                {
+                    _steps = ESteps.Done;
+                    Status = EOperationStatus.Failed;
+                    Error = _loadPackageManifestOp.Error;
                 }
             }
 

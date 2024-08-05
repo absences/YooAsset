@@ -111,7 +111,7 @@ namespace YooAsset
     /// <summary>
     /// 文件工具类
     /// </summary>
-    internal static class FileUtility
+    public static class FileUtility
     {
         /// <summary>
         /// 读取文件的文本数据

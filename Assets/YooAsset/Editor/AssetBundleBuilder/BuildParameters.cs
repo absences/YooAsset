@@ -16,10 +16,10 @@ namespace YooAsset.Editor
         /// </summary>
         public string BuildOutputRoot;
 
-        /// <summary>
-        /// 内置文件的根目录
-        /// </summary>
-        public string BuildinFileRoot;
+        ///// <summary>
+        ///// 内置文件的根目录
+        ///// </summary>
+        //public string BuildinFileRoot;
 
         /// <summary>
         /// 构建管线
@@ -62,21 +62,33 @@ namespace YooAsset.Editor
         /// </summary>
         public EFileNameStyle FileNameStyle;
 
-        /// <summary>
-        /// 内置文件的拷贝选项
-        /// </summary>
-        public EBuildinFileCopyOption BuildinFileCopyOption;
+        ///// <summary>
+        ///// 内置文件的拷贝选项
+        ///// </summary>
+        //public EBuildinFileCopyOption BuildinFileCopyOption;
 
-        /// <summary>
-        /// 内置文件的拷贝参数
-        /// </summary>
-        public string BuildinFileCopyParams;
+        ///// <summary>
+        ///// 内置文件的拷贝参数
+        ///// </summary>
+        //public string BuildinFileCopyParams;
 
         /// <summary>
         /// 资源包加密服务类
         /// </summary>
         public IEncryptionServices EncryptionServices;
 
+        /// <summary>
+        /// 清理材质
+        /// </summary>
+        public bool CleanMaterial = false;
+        /// <summary>
+        /// 包含debug资源
+        /// </summary>
+        public bool BuildDebug = false;
+        /// <summary>
+        /// 移动至clientPC，仅StandaloneWindows64生效
+        /// </summary>
+        public bool MoveToClientPC = false;
 
         private string _pipelineOutputDirectory = string.Empty;
         private string _packageOutputDirectory = string.Empty;
@@ -96,14 +108,14 @@ namespace YooAsset.Editor
             }
 
             // 检测是否有未保存场景
-            if (BuildMode != EBuildMode.SimulateBuild)
-            {
-                if (EditorTools.HasDirtyScenes())
-                {
-                    string message = BuildLogger.GetErrorMessage(ErrorCode.FoundUnsavedScene, "Found unsaved scene !");
-                    throw new Exception(message);
-                }
-            }
+            //if (BuildMode != EBuildMode.SimulateBuild)
+            //{
+            //    if (EditorTools.HasDirtyScenes())
+            //    {
+            //        string message = BuildLogger.GetErrorMessage(ErrorCode.FoundUnsavedScene, "Found unsaved scene !");
+            //        throw new Exception(message);
+            //    }
+            //}
 
             // 检测构建参数合法性
             if (BuildTarget == BuildTarget.NoTarget)
@@ -126,11 +138,11 @@ namespace YooAsset.Editor
                 string message = BuildLogger.GetErrorMessage(ErrorCode.BuildOutputRootIsNullOrEmpty, "Build output root is null or empty !");
                 throw new Exception(message);
             }
-            if (string.IsNullOrEmpty(BuildinFileRoot))
-            {
-                string message = BuildLogger.GetErrorMessage(ErrorCode.BuildinFileRootIsNullOrEmpty, "Buildin file root is null or empty !");
-                throw new Exception(message);
-            }
+            //if (string.IsNullOrEmpty(BuildinFileRoot))
+            //{
+            //    string message = BuildLogger.GetErrorMessage(ErrorCode.BuildinFileRootIsNullOrEmpty, "Buildin file root is null or empty !");
+            //    throw new Exception(message);
+            //}
 
             // 强制构建删除包裹目录
             if (BuildMode == EBuildMode.ForceRebuild)
@@ -143,14 +155,13 @@ namespace YooAsset.Editor
             }
 
             // 检测包裹输出目录是否存在
-            if (BuildMode != EBuildMode.SimulateBuild)
+            //if (BuildMode != EBuildMode.SimulateBuild)
+            string packageOutputDirectory = GetPackageOutputDirectory();
+            if (Directory.Exists(packageOutputDirectory))
             {
-                string packageOutputDirectory = GetPackageOutputDirectory();
-                if (Directory.Exists(packageOutputDirectory))
-                {
-                    string message = BuildLogger.GetErrorMessage(ErrorCode.PackageOutputDirectoryExists, $"Package outout directory exists: {packageOutputDirectory}");
-                    throw new Exception(message);
-                }
+                EditorTools.DeleteDirectory(packageOutputDirectory);
+                //string message = BuildLogger.GetErrorMessage(ErrorCode.PackageOutputDirectoryExists, $"Package outout directory exists: {packageOutputDirectory}");
+                //throw new Exception(message);
             }
 
             // 如果输出目录不存在
@@ -199,16 +210,16 @@ namespace YooAsset.Editor
             return _packageRootDirectory;
         }
 
-        /// <summary>
-        /// 获取内置资源的根目录
-        /// </summary>
-        public virtual string GetBuildinRootDirectory()
-        {
-            if (string.IsNullOrEmpty(_buildinRootDirectory))
-            {
-                _buildinRootDirectory = $"{BuildinFileRoot}/{PackageName}";
-            }
-            return _buildinRootDirectory;
-        }
+        ///// <summary>
+        ///// 获取内置资源的根目录
+        ///// </summary>
+        //public virtual string GetBuildinRootDirectory()
+        //{
+        //    if (string.IsNullOrEmpty(_buildinRootDirectory))
+        //    {
+        //        _buildinRootDirectory = $"{BuildinFileRoot}/{PackageName}";
+        //    }
+        //    return _buildinRootDirectory;
+        //}
     }
 }

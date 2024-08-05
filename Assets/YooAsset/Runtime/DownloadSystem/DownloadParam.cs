@@ -16,11 +16,6 @@ namespace YooAsset
         /// </summary>
         public string MainURL { set; get; }
 
-        /// <summary>
-        /// 备用资源地址
-        /// </summary>
-        public string FallbackURL { set; get; }
-
         public DownloadParam(int failedTryAgain, int timeout)
         {
             FailedTryAgain = failedTryAgain;

@@ -15,6 +15,7 @@ namespace YooAsset
         {
             OnAbort();
         }
+
         internal override void InternalWaitForAsyncComplete()
         {
             OnWaitForAsyncComplete();
@@ -39,7 +40,6 @@ namespace YooAsset
         /// 异步等待完成
         /// </summary>
         protected virtual void OnWaitForAsyncComplete() { }
-
         /// <summary>
         /// 异步操作系统是否繁忙
         /// </summary>

@@ -8,15 +8,8 @@ namespace YooAsset.Editor
     {
         public BuildResult Run(BuildParameters buildParameters, bool enableLog)
         {
-            if (buildParameters is BuiltinBuildParameters)
-            {
-                AssetBundleBuilder builder = new AssetBundleBuilder();
-                return builder.Run(buildParameters, GetDefaultBuildPipeline(), enableLog);
-            }
-            else
-            {
-                throw new Exception($"Invalid build parameter type : {buildParameters.GetType().Name}");
-            }
+            AssetBundleBuilder builder = new AssetBundleBuilder();
+            return builder.Run(buildParameters, GetDefaultBuildPipeline(), enableLog);
         }
 
         /// <summary>
@@ -26,16 +19,16 @@ namespace YooAsset.Editor
         {
             List<IBuildTask> pipeline = new List<IBuildTask>
                 {
-                    new TaskPrepare_BBP(),
+                    new TaskPrepare_BBP(),//参数检测
+                    new TaskMaterialsBuildAB_BBP(),//材质、ab
+                    new TaskCleanMat_BBP(),
                     new TaskGetBuildMap_BBP(),
                     new TaskBuilding_BBP(),
-                    new TaskVerifyBuildResult_BBP(),
                     new TaskEncryption_BBP(),
                     new TaskUpdateBundleInfo_BBP(),
                     new TaskCreateManifest_BBP(),
-                    new TaskCreateReport_BBP(),
                     new TaskCreatePackage_BBP(),
-                    new TaskCopyBuildinFiles_BBP(),
+                    new TaskCopyResult_BBP(),
                 };
             return pipeline;
         }

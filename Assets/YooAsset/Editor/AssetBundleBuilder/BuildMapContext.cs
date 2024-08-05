@@ -12,99 +12,76 @@ namespace YooAsset.Editor
         /// 资源包集合
         /// </summary>
         private readonly Dictionary<string, BuildBundleInfo> _bundleInfoDic = new Dictionary<string, BuildBundleInfo>(10000);
-
-        /// <summary>
-        /// 未被依赖的资源列表
-        /// </summary>
-        public readonly List<ReportIndependAsset> IndependAssets = new List<ReportIndependAsset>(1000);
-        
-        /// <summary>
-        /// 参与构建的资源总数
-        /// 说明：包括主动收集的资源以及其依赖的所有资源
-        /// </summary>
-        public int AssetFileCount;
-
-        /// <summary>
-        /// 资源收集命令
-        /// </summary>
-        public CollectCommand Command { set; get; }
-
         /// <summary>
         /// 资源包信息列表
         /// </summary>
-        public Dictionary<string, BuildBundleInfo>.ValueCollection Collection
+        public Dictionary<string, BuildBundleInfo> Collection
         {
             get
             {
-                return _bundleInfoDic.Values;
+                return _bundleInfoDic;
             }
         }
 
-
+        private AssetBundleBuild[] assetBundleBuilds = null;
         /// <summary>
-        /// 添加一个打包资源
+        /// 获取构建管线里需要的数据 存在空
         /// </summary>
-        public void PackAsset(BuildAssetInfo assetInfo)
+        public AssetBundleBuild[] GetPipelineBuilds(bool debug = false)
         {
-            string bundleName = assetInfo.BundleName;
-            if (string.IsNullOrEmpty(bundleName))
-                throw new Exception("Should never get here !");
+            if (assetBundleBuilds != null)
+                return assetBundleBuilds;
 
-            if (_bundleInfoDic.TryGetValue(bundleName, out BuildBundleInfo bundleInfo))
+            // 定义排除列表，包含不需要打包的Asset Bundle名称
+            List<string> exclusionList = new List<string>();
+            if (!debug)
+                exclusionList.Add("debug/");
+
+            // 获取所有的Asset Bundle路径
+            string[] allBundlePaths = AssetDatabase.GetAllAssetBundleNames();
+
+            // 创建AssetBundleBuild数组，用于存储要打包的Asset Bundle信息
+            assetBundleBuilds = new AssetBundleBuild[allBundlePaths.Length];
+
+            for (int i = 0; i < allBundlePaths.Length; i++)
             {
-                bundleInfo.PackAsset(assetInfo);
+                string bundlePath = allBundlePaths[i];
+
+                // 检查当前的Asset Bundle路径是否在排除列表中
+                if (!IsExcludedBundle(bundlePath, exclusionList))
+                {
+                    // 创建AssetBundleBuild对象并添加Asset Bundle信息
+                    AssetBundleBuild buildInfo = new AssetBundleBuild();
+                    buildInfo.assetBundleName = bundlePath;
+
+                    BuildBundleInfo info = new BuildBundleInfo(bundlePath);
+
+                    buildInfo.assetNames = AssetDatabase.GetAssetPathsFromAssetBundle(bundlePath);
+                    for (int j = 0; j < buildInfo.assetNames.Length; j++)
+                    {
+                        //Assets/Res/WorldMap/Building_field/Texture/alliance_fort_mask.png
+
+                        info.PackAsset(
+                            new BuildAssetInfo(new AssetInfo(buildInfo.assetNames[j]), bundlePath));
+                    }
+                    assetBundleBuilds[i] = buildInfo;
+
+                    _bundleInfoDic.Add(bundlePath, info);
+                }
             }
-            else
-            {
-                BuildBundleInfo newBundleInfo = new BuildBundleInfo(bundleName);
-                newBundleInfo.PackAsset(assetInfo);
-                _bundleInfoDic.Add(bundleName, newBundleInfo);
-            }
+            return assetBundleBuilds;
         }
 
-        /// <summary>
-        /// 是否包含资源包
-        /// </summary>
-        public bool IsContainsBundle(string bundleName)
-        {
-            return _bundleInfoDic.ContainsKey(bundleName);
-        }
 
-        /// <summary>
-        /// 获取资源包信息，如果没找到返回NULL
-        /// </summary>
-        public BuildBundleInfo GetBundleInfo(string bundleName)
+        private static bool IsExcludedBundle(string bundlePath, List<string> exclusionList)
         {
-            if (_bundleInfoDic.TryGetValue(bundleName, out BuildBundleInfo result))
+            // 检查当前的Asset Bundle路径是否在排除列表中
+            foreach (string excludedPrefix in exclusionList)
             {
-                return result;
+                if (bundlePath.StartsWith(excludedPrefix))
+                    return true;
             }
-            throw new Exception($"Should never get here ! Not found bundle : {bundleName}");
-        }
-
-        /// <summary>
-        /// 获取构建管线里需要的数据
-        /// </summary>
-        public UnityEditor.AssetBundleBuild[] GetPipelineBuilds()
-        {
-            List<UnityEditor.AssetBundleBuild> builds = new List<UnityEditor.AssetBundleBuild>(_bundleInfoDic.Count);
-            foreach (var bundleInfo in _bundleInfoDic.Values)
-            {
-                builds.Add(bundleInfo.CreatePipelineBuild());
-            }
-            return builds.ToArray();
-        }
-
-        /// <summary>
-        /// 创建着色器信息类
-        /// </summary>
-        public void CreateShadersBundleInfo(string shadersBundleName)
-        {
-            if (IsContainsBundle(shadersBundleName) == false)
-            {
-                var shaderBundleInfo = new BuildBundleInfo(shadersBundleName);
-                _bundleInfoDic.Add(shadersBundleName, shaderBundleInfo);
-            }
+            return false;
         }
     }
 }

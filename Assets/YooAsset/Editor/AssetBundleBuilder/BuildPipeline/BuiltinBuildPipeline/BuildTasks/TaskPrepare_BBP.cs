@@ -19,7 +19,7 @@ namespace YooAsset.Editor
 
             // 检测Unity版本
 #if UNITY_2021_3_OR_NEWER
-            if (buildParameters.BuildMode != EBuildMode.SimulateBuild)
+           // if (buildParameters.BuildMode != EBuildMode.SimulateBuild)
             {
                 string warning = BuildLogger.GetErrorMessage(ErrorCode.RecommendScriptBuildPipeline, $"Starting with UnityEngine2021, recommend use script build pipeline (SBP) !");
                 BuildLogger.Warning(warning);

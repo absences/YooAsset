@@ -1,5 +1,4 @@
-﻿
-namespace YooAsset.Editor
+﻿namespace YooAsset.Editor
 {
     public class TaskEncryption_BBP : TaskEncryption, IBuildTask
     {
@@ -7,7 +6,6 @@ namespace YooAsset.Editor
         {
             var buildParameters = context.GetContextObject<BuildParametersContext>();
             var buildMapContext = context.GetContextObject<BuildMapContext>();
-
             var buildMode = buildParameters.Parameters.BuildMode;
             if (buildMode == EBuildMode.ForceRebuild || buildMode == EBuildMode.IncrementalBuild)
             {
