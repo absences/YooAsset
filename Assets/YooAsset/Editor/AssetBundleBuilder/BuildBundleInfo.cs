@@ -56,6 +56,7 @@ namespace YooAsset.Editor
         public string EncryptedFilePath { set; get; }
         #endregion
 
+        private readonly HashSet<string> _assetPaths = new HashSet<string>();
 
         /// <summary>
         /// 参与构建的资源列表
@@ -88,9 +89,11 @@ namespace YooAsset.Editor
         /// </summary>
         public void PackAsset(BuildAssetInfo buildAsset)
         {
-            if (IsContainsAsset(buildAsset.AssetInfo.AssetPath))
-                throw new System.Exception($"Should never get here ! Asset is existed : {buildAsset.AssetInfo.AssetPath}");
+            string assetPath = buildAsset.AssetInfo.AssetPath;
+            if (_assetPaths.Contains(assetPath))
+                throw new System.Exception($"Should never get here ! Asset is existed : {assetPath}");
 
+            _assetPaths.Add(assetPath);
             MainAssets.Add(buildAsset);
         }
 
@@ -139,6 +142,19 @@ namespace YooAsset.Editor
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// 创建AssetBundleBuild类
+        /// </summary>
+        public UnityEditor.AssetBundleBuild CreatePipelineBuild()
+        {
+            // 注意：我们不再支持AssetBundle的变种机制
+            AssetBundleBuild build = new AssetBundleBuild();
+            build.assetBundleName = BundleName;
+            build.assetBundleVariant = string.Empty;
+            build.assetNames = GetAllMainAssetPaths();
+            return build;
         }
 
         /// <summary>

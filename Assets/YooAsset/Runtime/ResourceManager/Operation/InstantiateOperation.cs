@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-
 namespace YooAsset
 {
     public sealed class InstantiateOperation : AsyncOperationBase
@@ -17,6 +16,7 @@ namespace YooAsset
         private readonly Quaternion _rotation;
         private readonly Transform _parent;
         private readonly bool _worldPositionStays;
+        private readonly bool _actived;
         private ESteps _steps = ESteps.None;
 
         /// <summary>
@@ -25,7 +25,8 @@ namespace YooAsset
         public GameObject Result = null;
 
 
-        internal InstantiateOperation(AssetHandle handle, bool setPositionAndRotation, Vector3 position, Quaternion rotation, Transform parent, bool worldPositionStays)
+        internal InstantiateOperation(AssetHandle handle, bool setPositionAndRotation, Vector3 position, Quaternion rotation,
+            Transform parent, bool worldPositionStays, bool actived)
         {
             _handle = handle;
             _setPositionAndRotation = setPositionAndRotation;
@@ -33,6 +34,7 @@ namespace YooAsset
             _rotation = rotation;
             _parent = parent;
             _worldPositionStays = worldPositionStays;
+            _actived = actived;
         }
         internal override void InternalOnStart()
         {
@@ -66,6 +68,8 @@ namespace YooAsset
 
                 // 实例化游戏对象
                 Result = InstantiateInternal(_handle.AssetObject, _setPositionAndRotation, _position, _rotation, _parent, _worldPositionStays);
+                if (_actived == false)
+                    Result.SetActive(false);
 
                 _steps = ESteps.Done;
                 Status = EOperationStatus.Succeed;

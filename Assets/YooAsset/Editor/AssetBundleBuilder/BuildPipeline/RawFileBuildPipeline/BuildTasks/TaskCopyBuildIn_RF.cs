@@ -58,7 +58,7 @@ namespace YooAsset.Editor
             var Manifest = ManifestTools.DeserializeFromBinary(bytesData);
 
 
-            var ignoreTags = new string[] { "atlas/ui" };//不移动至sa的tag
+            var ignoreTags = new string[]{}; //{ "atlas/ui" };//不移动至sa的tag
 
             foreach (var packageBundle in Manifest.BundleList)
             {

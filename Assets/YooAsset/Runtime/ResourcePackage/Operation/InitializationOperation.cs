@@ -151,20 +151,24 @@ namespace YooAsset
 
             if (_steps == ESteps.CreateFileSystem)
             {
-                if (_parameters.BuildinFileSystemParameters == null)
-                {
-                    _steps = ESteps.Done;
-                    Status = EOperationStatus.Failed;
-                    Error = "Buildin file system parameters is null";
-                    return;
-                }
-
                 if (_parameters.CacheFileSystemParameters == null)
                 {
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
                     Error = "Cache file system parameters is null";
                     return;
+                }
+
+                if (_parameters.BuildinFileSystemParameters != null)
+                {
+                    _impl.BuildinFileSystem = PlayModeHelper.CreateFileSystem(_impl.PackageName, _parameters.BuildinFileSystemParameters);
+                    if (_impl.BuildinFileSystem == null)
+                    {
+                        _steps = ESteps.Done;
+                        Status = EOperationStatus.Failed;
+                        Error = "Failed to create buildin file system";
+                        return;
+                    }
                 }
 
                 if (_parameters.DeliveryFileSystemParameters != null)
@@ -179,15 +183,6 @@ namespace YooAsset
                     }
                 }
 
-                _impl.BuildinFileSystem = PlayModeHelper.CreateFileSystem(_impl.PackageName, _parameters.BuildinFileSystemParameters);
-                if (_impl.BuildinFileSystem == null)
-                {
-                    _steps = ESteps.Done;
-                    Status = EOperationStatus.Failed;
-                    Error = "Failed to create buildin file system";
-                    return;
-                }
-                
                 _impl.CacheFileSystem = PlayModeHelper.CreateFileSystem(_impl.PackageName, _parameters.CacheFileSystemParameters);
                 if (_impl.CacheFileSystem == null)
                 {
@@ -202,6 +197,13 @@ namespace YooAsset
 
             if (_steps == ESteps.InitBuildinFileSystem)
             {
+                // 注意：内置文件系统可以为空
+                if (_impl.BuildinFileSystem == null)
+                {
+                    _steps = ESteps.InitDeliveryFileSystem;
+                    return;
+                }
+
                 if (_initBuildinFileSystemOp == null)
                     _initBuildinFileSystemOp = _impl.BuildinFileSystem.InitializeFileSystemAsync();
 
@@ -220,7 +222,7 @@ namespace YooAsset
                     Error = _initBuildinFileSystemOp.Error;
                 }
             }
-            if (_steps == ESteps.LoadManifestFile)
+			 if (_steps == ESteps.LoadManifestFile)
             {
                 if (_loadPackageManifestOp == null)
                     _loadPackageManifestOp = _impl.BuildinFileSystem.LoadPackageManifestAsync(null, int.MaxValue);
