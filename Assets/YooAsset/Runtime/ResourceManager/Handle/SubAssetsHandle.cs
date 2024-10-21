@@ -89,8 +89,8 @@ namespace YooAsset
 
             foreach (var assetObject in Provider.AllAssetObjects)
             {
-                if (assetObject.name == assetName)
-                    return assetObject as TObject;
+                if (assetObject.name == assetName && assetObject is TObject asset)
+                    return asset;
             }
 
             YooLogger.Warning($"Not found sub asset object : {assetName}");
