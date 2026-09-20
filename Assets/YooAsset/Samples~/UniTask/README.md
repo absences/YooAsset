@@ -39,7 +39,7 @@ public class TestTask : MonoBehaviour
 
 3. 拷贝YOO提供的扩展脚本到工程内。
 
-   YooAssets/Samples/UniTask Sample/UniTask目录
+   YooAssets/Samples/UniTask/UniTask目录
 
 4. 添加引擎里的宏定义（在宏定义未生效的情况下）
 
@@ -59,9 +59,9 @@ public class TestTask : MonoBehaviour
 
 2. 拷贝YOO提供的扩展脚本到工程内。
 
-   YooAssets/Samples/UniTask Sample/UniTask目录
+   YooAssets/Samples/UniTask/UniTask目录
 
-   YooAssets/Samples/UniTask Sample/UniTaskRef目录
+   YooAssets/Samples/UniTask/UniTaskRef目录
 
 3. 添加引擎里的宏定义（在宏定义未生效的情况下）
 
